@@ -28,8 +28,8 @@
 #define JAUNE 0x0E
 #define BLANC 0x0F
 
-
-
+#define TRUE 0x01
+#define FALSE 0x00
 
 extern void console_putbytes(const char *s, int len);
 

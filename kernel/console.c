@@ -4,10 +4,9 @@
 #include "stdint.h"
 #include "string.h"
 #include "console.h"
+#include "segment.h"
 
 uint16_t ligne, colonne;
-uint16_t nb_tic = 0;
-uint16_t nb_sec = 0;
 
 // revoie l'adresse mémoir de lig col
 uint16_t *ptr_mem(uint32_t lig, uint32_t col)
@@ -30,7 +29,7 @@ void efface_ecran(void){
 
     for (uint32_t i=0; i<15; i++ ){
         for (uint32_t j=0; j<LARGEUR; j++){
-            ecrit_car(i, j, NOIR, NOIR, NOIR, ' ');
+            ecrit_car(i, j, NOIR, NOIR, FALSE, ' ');
         }
     }
 }
@@ -85,7 +84,7 @@ void traite_car(char c){
     
     default:
         if (c <= 126 && c >= 32){
-            ecrit_car(ligne, colonne, BLANC, NOIR, 0x00, c);
+            ecrit_car(ligne, colonne, BLANC, NOIR, FALSE, c);
             col = colonne +1;
             lig = ligne;
 
@@ -106,7 +105,7 @@ void defilement(void){
 
 
     for(uint32_t j=0; j<LARGEUR; j++){
-        ecrit_car((HAUTEUR-1), j, NOIR,NOIR,NOIR, ' ');
+        ecrit_car((HAUTEUR-1), j, NOIR, NOIR, FALSE, ' ');
     }
     place_curseur((HAUTEUR-1), 0);
 }
@@ -129,3 +128,5 @@ void console_putbytes(const char *s, int len){
     }
    
 }
+
+
