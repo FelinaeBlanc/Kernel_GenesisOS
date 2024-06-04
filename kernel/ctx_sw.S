@@ -19,6 +19,3 @@ ctx_sw:
     movl 16(%eax), %edi
     # on passe la main au nouveau processus
     ret
-
-create_context:
-    

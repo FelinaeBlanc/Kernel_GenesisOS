@@ -125,6 +125,10 @@ void console_putbytes(const char *s, int len){
             j = j%HAUTEUR;
             i++;
         }
+        if(ligne == HAUTEUR-1){
+            defilement();
+            ligne --;
+        }
     }
    
 }
