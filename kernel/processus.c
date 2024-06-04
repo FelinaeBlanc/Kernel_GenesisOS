@@ -5,6 +5,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include "horloge.h"
 
 
 struct PidLibre * PidLibreTete;
@@ -157,7 +158,7 @@ void dors(uint32_t nbr_secs){
     struct Processus * procEndormir = ProcActivTete;
 
     procEndormir->etat = ENDORMI;
-    procEndormir->secReveille = nbr_secs;
+    procEndormir->secReveille = nbr_secondes()+nbr_secs;
     ProcActivTete = procEndormir->next;
     ProcActivTete->etat = ELU;
 
