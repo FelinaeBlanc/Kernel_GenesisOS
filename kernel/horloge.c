@@ -8,6 +8,7 @@
 #include "console.h"
 #include "horloge.h"
 #include "stdbool.h"
+#include "processus.h"
 
 void ecrit_temps(char *s, int len){
 
@@ -32,8 +33,9 @@ uint32_t heures = 0;
 void tic_PIT(void) {
     outb(0x20, 0x20);  // Accusé de réception de l'interruption
     nb_tic++;
-
+    
     if (nb_tic == 50) {
+        
         nb_tic = 0;
         secondes++;
 
@@ -50,9 +52,15 @@ void tic_PIT(void) {
         char timeString[LARGEUR];
         sprintf(timeString, "%02d:%02d:%02d", heures, minutes, secondes);
         ecrit_temps(timeString, 8);
+
+        verifie_reveille(secondes);
     }
+    ordonnanceur();
 }
 
+uint32_t nbr_secondes(){
+    return secondes;
+}
 
 void traitant_IT_32();
 
@@ -69,7 +77,7 @@ void init_traitant_IT(uint32_t num_IT, void (*traitant)(void)){
 // Règle la fréquence des signaux
 void reg_frequence(void)
 {
-    uint16_t frequence = QUARTZ / CLOCKFREQ;
+    uint16_t frequence = QUARTZ / SCHEDFREQ;
 
     outb(0x34,0x43);
     outb((uint8_t)(frequence & 0xFF), 0x40);
