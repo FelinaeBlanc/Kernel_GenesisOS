@@ -11,11 +11,13 @@
 struct PidLibre * PidLibreTete;
 struct Processus * ProcActivTete;
 struct Processus * ProcActivQueue;
+struct Processus * ProcElu;
+
 struct Processus * ProcDortTete;
 
 struct Processus * tableDesProcs[MAX_PROCESS];
 
-
+int stop = 0;
 // retourne le pid en tete (PidLibreTete), déplace la tete ensuite
 int32_t get_pid(){
     int32_t pid = -1;
@@ -50,52 +52,69 @@ int32_t cree_processus(void (*code)(void), char *nom){
         proc->secReveille = 0;
 
         tableDesProcs[pid] = proc;
-
+        
         insert_queue_activable(proc);
     }
-    
+
     return pid;
 }
 
 int32_t mon_pid(void){
-    if (ProcActivTete != NULL){
-        return ProcActivTete->pid;
-    } else {
-        return -1;
-    }
+    return ProcElu != NULL ? (int32_t) ProcElu->pid :  -1;
 }
 
 char *mon_nom(void){
-    if (ProcActivTete != NULL){
-        return ProcActivTete->nom;
-    } else {
-        return "No Proc";
-    }
+    return ProcElu != NULL ? ProcElu->nom : "No Proc";
 }
 
 /********* Ordonnanceur *********/
 
 void print_activable_queue() {
     struct Processus *current = ProcActivTete;
+    printf("Activable: ELU = %s |",ProcElu->nom);
     while (current != NULL) {
-        printf("Processus PID: %d, Nom: %s, Etat: %d\n", current->pid, current->nom, current->etat);
+        printf("-> %s",current->nom);
         current = current->next;
     }
+    printf("\n");
+}
+void print_endormis_queue() {
+    struct Processus *current = ProcDortTete;
+    printf("Endormis: ");
+    while (current != NULL) {
+        printf("-> %s n",current->nom);
+        if (current == current->next){
+            printf("Boucle infinie... \n");
+            printf("Activable: \n");
+            print_activable_queue();
+            stop = 1;
+            break;
+        }
+        current = current->next;
+    }
+    printf("\n");
 }
 
-void ordonnanceur(void){
-    print_activable_queue();
-    struct Processus * procActuel = ProcActivTete;
-    struct Processus * procNext;
-    if(procActuel != NULL && procActuel->next != NULL){
-        procNext = procActuel->next;
 
-        //printf("Moving current process (%s, pid: %d) to end of queue.\n", procActuel->nom, procActuel->pid);
-        //printf("Setting next process (%s, pid: %d) as active.\n", procNext->nom, procNext->pid);
-        
-        procActuel->etat = ACTIVABLE;
+void ordonnanceur(void){
+    if (stop){ return; }
+    
+    if (ProcElu == NULL){
+        printf("Aucun processus Elu... On donne le 1er par defaut\n");
+        ProcElu = ProcActivTete;
+        ProcElu->etat = ELU;
+        ProcActivTete = ProcActivTete->next;
+        return;
+    }
+
+    struct Processus * procActuel = ProcElu;
+    struct Processus * procNext = ProcActivTete;
+
+    if(procNext != NULL){
+        // Switch les états
         procNext->etat = ELU;
-        ProcActivTete = procNext;
+        ProcElu = procNext;
+        ProcActivTete = procNext->next; // On déplace la tête de la queue
 
         insert_queue_activable(procActuel);
         ctx_sw(procActuel->contexte,procNext->contexte);
@@ -120,51 +139,31 @@ void init_ordonnanceur(){
 /********* Activable *********/
 
 
-void insert_tete_activable(struct Processus *proc){
-    if(ProcActivTete == NULL){ // Initialise la queue et la tete avec lui même (1 seul élément)
-        proc->next = NULL;
-        ProcActivTete = proc;
-        ProcActivQueue = proc;
-        ProcActivQueue->etat = ELU;
-    }
-    else {
-        proc->next = ProcActivTete;
-        ProcActivTete = proc;
-
-        ProcActivQueue->etat = ELU;
-        proc->next->etat = ACTIVABLE;
-    }
-    
-}
-
-
 void insert_queue_activable(struct Processus *proc){
-    proc->next = NULL;
-
-    if(ProcActivTete == NULL){ // Initialise la queue et la tete avec lui même (1 seul élément)
+    if (ProcActivTete == NULL){
         ProcActivTete = proc;
         ProcActivQueue = proc;
-        ProcActivQueue->etat = ELU;
-    }
-    else {
+    } else {
         ProcActivQueue->next = proc;
         ProcActivQueue = proc;
-        ProcActivQueue->etat = ACTIVABLE;
     }
+    proc->etat = ACTIVABLE;
+    ProcActivQueue->next = NULL; // On met le next à NULL
 }
 
 /*******Endormi******/
 void dors(uint32_t nbr_secs){
-    struct Processus * procEndormir = ProcActivTete;
 
+    struct Processus * procEndormir = ProcElu;
     procEndormir->etat = ENDORMI;
     procEndormir->secReveille = nbr_secondes()+nbr_secs;
-    ProcActivTete = procEndormir->next;
-    ProcActivTete->etat = ELU;
+
+    ProcElu = ProcActivTete;
+    ProcElu->etat = ELU;
+    ProcActivTete = ProcActivTete->next;
 
     insert_endormi(procEndormir);
-    
-    ctx_sw(procEndormir->contexte,ProcActivTete->contexte);
+    ctx_sw(procEndormir->contexte,ProcElu->contexte);
 }
 
 void insert_endormi(struct Processus *proc) {
@@ -175,10 +174,7 @@ void insert_endormi(struct Processus *proc) {
     } else {
         // Parcourir la liste pour trouver l'endroit d'insertion
         struct Processus *current = ProcDortTete;
-        while (current!= NULL && current->secReveille <= proc->secReveille) {
-            if (current->next == NULL || current->next->secReveille > proc->secReveille) {
-                break; // On a trouvé l'emplacement ou on atteint la fin de la liste
-            }
+        while(current->next != NULL && current->next->secReveille <= proc->secReveille){
             current = current->next;
         }
 
@@ -191,13 +187,16 @@ void insert_endormi(struct Processus *proc) {
 
 
 void verifie_reveille(uint32_t secSystem){
-
+    if (stop){ return; }
+    /*printf("===== Verifie reveille %d\n",secSystem);
+    printf("Avant reveille: ");
+    print_activable_queue();
+    print_endormis_queue();*/
     struct Processus *current = ProcDortTete;
     struct Processus *next;
 
     while (current != NULL) {
         if (current->secReveille > secSystem){
-            ProcDortTete = current; // On vire les procs réveiller !
             break; // Sert à rien de continuer de vérifier le reste...
         }
         
@@ -206,5 +205,6 @@ void verifie_reveille(uint32_t secSystem){
         current = next;
         
     }
+    ProcDortTete = current; // On vire les procs réveiller !
 }
 

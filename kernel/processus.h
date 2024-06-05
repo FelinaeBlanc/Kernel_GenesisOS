@@ -4,7 +4,7 @@
 #include "stdint.h"
 
 #define MAX_PROCESS 4
-#define SIZE_PILE_EXEC 512
+#define SIZE_PILE_EXEC 2048
 
 enum Etat { ELU, ACTIVABLE, ENDORMI, ZOMBIE };
 
@@ -21,7 +21,7 @@ struct Processus {
 // tête et queue des processsus endormis
 extern struct Processus * ProcActivTete;
 extern struct Processus * ProcActivQueue;
-
+extern struct Processus * ProcElu;
 
 struct PidLibre {
     uint32_t pid;
@@ -31,6 +31,8 @@ struct PidLibre {
 extern struct PidLibre * PidLibreTete;
 
 extern struct Processus * tableDesProcs[MAX_PROCESS];
+
+extern int stop;
 
 /* Fonction control switch */
 void ctx_sw(int *, int *);

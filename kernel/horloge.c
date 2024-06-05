@@ -34,6 +34,7 @@ void tic_PIT(void) {
     outb(0x20, 0x20);  // Accusé de réception de l'interruption
     nb_tic++;
     
+    ordonnanceur();
     if (nb_tic == 50) {
         
         nb_tic = 0;
@@ -48,18 +49,18 @@ void tic_PIT(void) {
             minutes = 0;
             heures++;
         }
+        //printf("Temps: %s\n", timeString);
+        verifie_reveille(nbr_secondes());
 
         char timeString[LARGEUR];
         sprintf(timeString, "%02d:%02d:%02d", heures, minutes, secondes);
         ecrit_temps(timeString, 8);
-
-        verifie_reveille(secondes);
     }
-    ordonnanceur();
+    
 }
 
 uint32_t nbr_secondes(){
-    return secondes;
+    return heures*3600+minutes*60+secondes;
 }
 
 void traitant_IT_32();
