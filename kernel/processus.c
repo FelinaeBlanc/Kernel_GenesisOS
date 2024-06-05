@@ -74,7 +74,7 @@ int32_t cree_processus(void (*code)(void), int prio, char *nom){
 
         // gestion des filiation
         proc->pere = ProcElu; // Le proc ELU est celui qui a creer le fils
-        if (ProcElu != NULL){
+        if (ProcElu != NULL){ // Verifie si on initialise le premier processus ... (idle)
             printf("Fils ajouté\n");
             add_fils(ProcElu, proc);
         } else {
@@ -114,23 +114,25 @@ void free_mourant_queue(){
 
 /*********TEST FNC*********/
 // Fonction pour afficher l'état de chaque processus
+void proc_test_enfant(){
+    printf("proc_test enfant [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+    mon_pid());
+    dors(2);
+}
 void proc_test_a(){
     printf("proc_test a [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
           mon_pid());
-    dors(1);
-}
-void proc_test_b(){
-    printf("proc_test b [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
-          mon_pid());
-    dors(2);
-}
-void proc_test_c(){
-    printf("proc_test c [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
-          mon_pid());
-    dors(3);
-}
-/***********END TEST FNC*********/
 
+    int pid = cree_processus(&proc_test_enfant, COMMUN , "proc_test_enfant");
+
+    int pid_caca;
+    pid = waitpid(pid, &pid_caca);
+    printf("enfant pid = %i\n", pid);
+          dors(2);
+}
+
+/***********END TEST FNC*********/
+int made = 0;
 void ordonnanceur(void){
     free_mourant_queue(); // On libère les processus mourant
     
@@ -141,16 +143,18 @@ void ordonnanceur(void){
         return;
     }
     /*****TEST******/
+    if (made == 0){
+        made = 1;
+        cree_processus(&proc_test_a, COMMUN , "proc_testa");
+    }
     
-    cree_processus(&proc_test_a, COMMUN , "proc_testa");
-    cree_processus(&proc_test_b, COMMUN , "proc_testb");
-    cree_processus(&proc_test_c, COMMUN , "proc_testc");
     
     /*****END TEST***/
     
     struct Processus * procActuel = ProcElu;
     struct Processus * procsuiv = queue_out(&proc_activables, struct Processus, chainage);
     if(procsuiv != NULL){
+        printf("Changement de contexte de %s à %s\n", procActuel->nom, procsuiv->nom);
         // Switch les états
         procsuiv->etat = ELU;
         ProcElu = procsuiv;
@@ -218,9 +222,13 @@ void verifie_reveille(uint32_t secSystem) {
 // etval est passée à son père quand il appelle waitpid
 void fin_processus(void){
     struct Processus * procMort = ProcElu;
-    procMort->etat = MOURANT;
-    queue_add(procMort, &proc_mourants, struct Processus, chainage, prio);
 
+    if (procMort->pere != ProcIdle){
+        procMort->etat = ZOMBIE;
+    } else {
+        procMort->etat = MOURANT;
+        queue_add(procMort, &proc_mourants, struct Processus, chainage, prio);
+    }
     // On change d'élu
     ProcElu = queue_out(&proc_activables, struct Processus, chainage);
     ProcElu->etat = ELU;
@@ -247,24 +255,7 @@ int waitpid(int pid, int *retvalp){
         return pid;
     }
 
-    /*if (queue_empty(&ProcElu->chainage_fils)){
-        return -1;
-    }
-    
-    struct Processus * procFils;
-    // for queue_for_each
-    while (1){
-        queue_for_each(procFils, &ProcElu->chainage_fils, struct Processus, chainage){
-            if (procFils->etat == ZOMBIE){
-                break;
-            }
-        }
-        if (procFils != NULL){
-            break;
-        }
-        ordonnanceur();
-    }*/
-
+    // Si pid < 0, On attend le premier fils zombie
     struct Fils * procFils = ProcElu->FilsTete;
     if (procFils == NULL){ // On vérifie que le processus a des fils
         return -1;

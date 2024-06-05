@@ -15,6 +15,7 @@ void idle() {
   }
 }
 
+struct Processus * ProcIdle;
 void kernel_start(void)
 {
     printf("\f");
@@ -24,7 +25,9 @@ void kernel_start(void)
 
     init_ordonnanceur(); // Init l'ordonnanceur
     
-    cree_processus(&idle,IDLE,"idle");
+    int pid_idle = cree_processus(&idle,IDLE,"idle");
+    ProcIdle = tableDesProcs[pid_idle];
+
     init_traitant_IT(32, traitant_IT_32);
 
     idle();

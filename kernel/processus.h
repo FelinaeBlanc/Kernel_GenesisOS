@@ -41,6 +41,7 @@ struct Processus {
     
 };
 // Déclaration des variables globales de processus
+extern struct Processus * ProcIdle;
 extern struct Processus * ProcElu;
 extern struct Processus * tableDesProcs[MAX_PROCESS];
 
@@ -69,5 +70,9 @@ void verifie_reveille(uint32_t);
 /*****Exit*****/
 
 void fin_processus(void);
+
+/**** Fonction Filiation ****/
+
+int waitpid(int, int *);
 
 #endif
