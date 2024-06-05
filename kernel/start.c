@@ -15,25 +15,6 @@ void idle() {
   }
 }
 
-void proc1(void) {
-      printf("proc1 [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
-      mon_pid());
-      dors(2);
-    
-}
-
-void proc2(void) {
-  printf("proc2 [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
-          mon_pid());
-  dors(3);
-}
-
-void proc3(void) {
-    printf("proc3 [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
-          mon_pid());
-    dors(2);
-}
-
 void kernel_start(void)
 {
     printf("\f");
@@ -43,7 +24,7 @@ void kernel_start(void)
 
     init_ordonnanceur(); // Init l'ordonnanceur
     
-    cree_processus(&idle,"idle");
+    cree_processus(&idle,IDLE,"idle");
     init_traitant_IT(32, traitant_IT_32);
 
     idle();

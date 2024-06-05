@@ -6,17 +6,23 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "horloge.h"
-
+#include "queue.h"
 
 struct PidLibre * PidLibreTete;
-struct Processus * ProcActivTete;
-struct Processus * ProcActivQueue;
-struct Processus * ProcElu;
-struct Processus * ProcMourantTete;
-
-struct Processus * ProcDortTete;
-
 struct Processus * tableDesProcs[MAX_PROCESS];
+
+struct Processus * ProcElu;
+
+LIST_HEAD(proc_activables);
+LIST_HEAD(proc_endormis);
+LIST_HEAD(proc_mourants);
+void init_listes(void) {
+    INIT_LIST_HEAD(&proc_activables);
+    INIT_LIST_HEAD(&proc_endormis);
+    INIT_LIST_HEAD(&proc_mourants);
+
+    printf("Listes initialisées\n");
+}
 
 
 // retourne le pid en tete (PidLibreTete), déplace la tete ensuite
@@ -40,7 +46,8 @@ void add_pid(int32_t pid){
     PidLibreTete = pLibreNew; // La tête est mise avec le nouvelle tête
 }
 
-void AddFils(struct Processus * pere, struct Processus * fils){
+// ajout un fils à un processus
+void add_fils(struct Processus * pere, struct Processus * fils){
     struct Fils * filsNew = mem_alloc(sizeof(struct Fils));
     filsNew->procFils = fils;
     filsNew->suiv = pere->FilsTete;
@@ -64,14 +71,19 @@ int32_t cree_processus(void (*code)(void), int prio, char *nom){
         proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-2];
         proc->pile[SIZE_PILE_EXEC - 1] = (int32_t)fin_processus;
         proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)code;
-        
+
         // gestion des filiation
         proc->pere = ProcElu; // Le proc ELU est celui qui a creer le fils
-        proc->FilsTete = NULL; // ces fils zombie sont mort pour le moment
-        AddFils(proc->pere,proc);
+        if (ProcElu != NULL){
+            printf("Fils ajouté\n");
+            add_fils(ProcElu, proc);
+        } else {
+            printf("Idle!!!!\n");
+        }
 
         tableDesProcs[pid] = proc;
-        insert_queue_activable(proc, prio);
+        queue_add(proc, &proc_activables, struct Processus, chainage, prio);
+
     }
     return pid;
 }
@@ -90,18 +102,12 @@ char *mon_nom(void){
 
 // Libère les processus mourant
 void free_mourant_queue(){
-    // on libère les pid mourant 
-    struct Processus *current = ProcMourantTete;
-    struct Processus *suiv;
-    while (current != NULL) {
-        suiv = current->suiv;
-        tableDesProcs[current->pid] = NULL;
-
-        add_pid(current->pid); // On libère le pid
-        mem_free(current, sizeof(struct Processus));
-        current = suiv;
+    struct Processus * procMort;
+    while ((procMort = queue_out(&proc_mourants, struct Processus, chainage)) != NULL){
+        tableDesProcs[procMort->pid] = NULL;
+        add_pid(procMort->pid); // On libère le pid
+        mem_free(procMort, sizeof(struct Processus));
     }
-    ProcMourantTete = NULL;
 }
 
 
@@ -119,9 +125,8 @@ void ordonnanceur(void){
     
     if (ProcElu == NULL){
         // si on a pas d'elu on prend le premier activable
-        ProcElu = ProcActivTete; // on assume le fait qu'au moins un processus existe
+        ProcElu = queue_out(&proc_activables, struct Processus, chainage); // on assume le fait qu'au moins un processus existe
         ProcElu->etat = ELU;
-        ProcActivTete = ProcActivTete->suiv;
         return;
     }
     /*****TEST******/
@@ -129,15 +134,13 @@ void ordonnanceur(void){
     /*****END TEST***/
     
     struct Processus * procActuel = ProcElu;
-    struct Processus * procsuiv = ProcActivTete;
+    struct Processus * procsuiv = queue_out(&proc_activables, struct Processus, chainage);
     if(procsuiv != NULL){
         // Switch les états
         procsuiv->etat = ELU;
         ProcElu = procsuiv;
-        ProcActivTete = procsuiv->suiv; // On déplace la tête de la queue
+        queue_add(procActuel, &proc_activables, struct Processus, chainage, prio);
 
-        // on mets l'acctuelle dans la liste des activable (en dernier!) 
-        insert_queue_activable(procActuel, procActuel->prio);
         ctx_sw(procActuel->contexte,procsuiv->contexte);
     }
 }
@@ -155,21 +158,8 @@ void init_ordonnanceur(){
         pLibre->suivPid = pLibresuiv;
         pLibre = pLibresuiv;
     }
-}
 
-/********* Activable *********/
-
-
-void insert_queue_activable(struct Processus *proc, int prio){
-    if (ProcActivTete == NULL){
-        ProcActivTete = proc;
-        ProcActivQueue = proc;
-    } else {
-        ProcActivQueue->suiv = proc;
-        ProcActivQueue = proc;
-    }
-    proc->etat = ACTIVABLE;
-    ProcActivQueue->suiv = NULL; // On met le suiv à NULL
+    init_listes();
 }
 
 /*******Endormi******/
@@ -179,100 +169,43 @@ void dors(uint32_t nbr_secs){
     procEndormir->etat = ENDORMI;
     procEndormir->secReveille = nbr_secondes()+nbr_secs; // On ajoute le temps de réveil
     // On change d'élu
-    ProcElu = ProcActivTete;
+    ProcElu = queue_out(&proc_activables, struct Processus, chainage); // on assume le fait qu'au moins un processus existe
     ProcElu->etat = ELU;
-    ProcActivTete = ProcActivTete->suiv;
 
-    insert_endormi(procEndormir);
+    // On ajoute le processus endormi
+    queue_add(procEndormir, &proc_endormis, struct Processus, chainage, secReveille);
     ctx_sw(procEndormir->contexte,ProcElu->contexte);
 }
 
-void insert_endormi(struct Processus *proc) {
-    // Si la liste est vide ou si le proc doit être placé au début
-    if (ProcDortTete == NULL || proc->secReveille < ProcDortTete->secReveille) {
-        proc->suiv = ProcDortTete;
-        ProcDortTete = proc;
-    } else {
-        // Parcourir la liste pour trouver l'endroit d'insertion
-        struct Processus *current = ProcDortTete;
-        while(current->suiv != NULL && current->suiv->secReveille <= proc->secReveille){
-            current = current->suiv;
-        }
 
-        // Insérer le proc juste avant l'élément courant
-        proc->suiv = current->suiv;
-        current->suiv = proc;
+void verifie_reveille(uint32_t secSystem) {
+    struct Processus *current;
+    // use queue_for_each_prev
+    queue_for_each_prev(current, &proc_endormis, struct Processus, chainage) {
+        if (current->secReveille <= secSystem){
+            current->etat = ACTIVABLE;
+            queue_add(current, &proc_activables, struct Processus, chainage, prio);
+            queue_del(current, chainage);
+        } else {
+            break;
+        }
     }
 }
 
-
-void verifie_reveille(uint32_t secSystem){
-
-    struct Processus *current = ProcDortTete;
-    struct Processus *suiv;
-
-    while (current != NULL) {
-        if (current->secReveille > secSystem){
-            break; // Sert à rien de continuer de vérifier le reste...
-        }
-
-        suiv = current->suiv;
-        insert_queue_activable(current);
-        current = suiv;
-
-    }
-    ProcDortTete = current; // On vire les procs réveiller !
-}
 
 /*****Exit*****/
 // void exit(int retval);
 // etval est passée à son père quand il appelle waitpid
 void fin_processus(void){
     struct Processus * procMort = ProcElu;
-
-    // On tue procMort et en l'insert en tete des morts
     procMort->etat = MOURANT;
-    procMort->suiv = ProcMourantTete;
-    ProcMourantTete = procMort;
-    
+    queue_add(procMort, &proc_mourants, struct Processus, chainage, prio);
+
     // On change d'élu
-    ProcElu = ProcActivTete;
+    ProcElu = queue_out(&proc_activables, struct Processus, chainage);
     ProcElu->etat = ELU;
-    ProcActivTete = ProcActivTete->suiv;
-    // printf("Je meurs %s\n",procMort->nom);
+
     ctx_sw(procMort->contexte, ProcElu->contexte);
-}
-
-
-/*************Affichage pour debug *****************/
-
-void afficher_etats_processus() {
-    for (int i = 0; i < MAX_PROCESS; ++i) {
-        struct Processus *proc = tableDesProcs[i];
-        if (proc != NULL) {
-            printf("Processus PID: %d, Nom: %s, Etat: %d\n", proc->pid, proc->nom, proc->etat);
-        }
-    }
-}
-
-void print_activable_queue() {
-    struct Processus *current = ProcActivTete;
-    printf("Activable: ELU = %s |",ProcElu->nom);
-    while (current != NULL) {
-        printf("-> %s",current->nom);
-        current = current->suiv;
-    }
-    printf("\n");
-}
-
-void print_endormis_queue() {
-    struct Processus *current = ProcDortTete;
-    printf("Endormis: ");
-    while (current != NULL) {
-        printf("-> %s n",current->nom);
-        current = current->suiv;
-    }
-    printf("\n");
 }
 
 /*************Filiation**************/
@@ -294,22 +227,23 @@ int waitpid(int pid, int *retvalp){
         return pid;
     }
 
-    // On attend le premier fils zombie qui se termine
-    struct Processus *procFils = ProcElu->procFilsTete;
-    if (procFils == NULL){ // Pas de fils
+    if (queue_empty(&ProcElu->chainage_fils)){
         return -1;
     }
-
-    while(1){ // On attend un fils zombie
-        while(procFils != NULL && procFils->etat != ZOMBIE){
-            procFils = procFils->suiv;
+    
+    struct Processus * procFils;
+    // for queue_for_each
+    while (1){
+        queue_for_each(procFils, &ProcElu->chainage_fils, struct Processus, chainage){
+            if (procFils->etat == ZOMBIE){
+                break;
+            }
         }
         if (procFils != NULL){
             break;
         }
         ordonnanceur();
     }
-    
     
     *retvalp = procFils->retvalp;
     return pid;
