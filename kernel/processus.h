@@ -8,7 +8,7 @@
 #define SIZE_PILE_EXEC 512
 
 enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE };
-enum Prio { IDLE, COMMUN, PRIORITAIRE};
+enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 struct PidLibre {
     uint32_t pid;

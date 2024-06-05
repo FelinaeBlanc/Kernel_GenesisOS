@@ -104,6 +104,7 @@ char *mon_nom(void){
 void free_mourant_queue(){
     struct Processus * procMort;
     while ((procMort = queue_out(&proc_mourants, struct Processus, chainage)) != NULL){
+        printf("Je suis mort %s\n", procMort->nom);
         tableDesProcs[procMort->pid] = NULL;
         add_pid(procMort->pid); // On libère le pid
         mem_free(procMort, sizeof(struct Processus));
@@ -113,8 +114,18 @@ void free_mourant_queue(){
 
 /*********TEST FNC*********/
 // Fonction pour afficher l'état de chaque processus
-void proc_test(){
-    printf("proc_test [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+void proc_test_a(){
+    printf("proc_test a [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+          mon_pid());
+    dors(1);
+}
+void proc_test_b(){
+    printf("proc_test b [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+          mon_pid());
+    dors(2);
+}
+void proc_test_c(){
+    printf("proc_test c [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
           mon_pid());
     dors(3);
 }
@@ -130,7 +141,11 @@ void ordonnanceur(void){
         return;
     }
     /*****TEST******/
-    cree_processus(&proc_test, COMMUN , "proc_test");
+    
+    cree_processus(&proc_test_a, COMMUN , "proc_testa");
+    cree_processus(&proc_test_b, COMMUN , "proc_testb");
+    cree_processus(&proc_test_c, COMMUN , "proc_testc");
+    
     /*****END TEST***/
     
     struct Processus * procActuel = ProcElu;
@@ -180,18 +195,23 @@ void dors(uint32_t nbr_secs){
 
 void verifie_reveille(uint32_t secSystem) {
     struct Processus *current;
-    // use queue_for_each_prev
-    queue_for_each_prev(current, &proc_endormis, struct Processus, chainage) {
+    struct Processus *next;
+
+    // Itérer en sens inverse sur la liste des endormis
+    queue_for_each(current, &proc_endormis, struct Processus, chainage) {
+        // Sauvegarder le pointeur vers l'élément suivant car 'current' peut être modifié dans le corps de la boucle
+        next = queue_entry(current->chainage.prev, struct Processus, chainage);
         if (current->secReveille <= secSystem){
             current->etat = ACTIVABLE;
-            queue_add(current, &proc_activables, struct Processus, chainage, prio);
+
             queue_del(current, chainage);
+            queue_add(current, &proc_activables, struct Processus, chainage, prio);
         } else {
             break;
         }
+        current = next;
     }
 }
-
 
 /*****Exit*****/
 // void exit(int retval);
@@ -227,7 +247,7 @@ int waitpid(int pid, int *retvalp){
         return pid;
     }
 
-    if (queue_empty(&ProcElu->chainage_fils)){
+    /*if (queue_empty(&ProcElu->chainage_fils)){
         return -1;
     }
     
@@ -243,9 +263,29 @@ int waitpid(int pid, int *retvalp){
             break;
         }
         ordonnanceur();
+    }*/
+
+    struct Fils * procFils = ProcElu->FilsTete;
+    if (procFils == NULL){ // On vérifie que le processus a des fils
+        return -1;
     }
+    while(1){
+        procFils = ProcElu->FilsTete; // On réinitialise
+        while (procFils != NULL){
+            if (procFils->procFils->etat == ZOMBIE){
+                break;
+            }
+            procFils = procFils->suiv;
+        }
+        if (procFils != NULL){
+            break;
+        } else {
+            ordonnanceur(); // On attend
+        }
+    }
+
     
-    *retvalp = procFils->retvalp;
+    *retvalp = procFils->procFils->retvalp;
     return pid;
 }
 
