@@ -323,45 +323,43 @@ void fin_processus(void){
     }
     ordonnanceur();
 }
-int kill(int pid);
 
 // La primitive kill termine le processus identifié par la valeur pid. Si ce processus était bloqué dans une file 
 // d'attente pour un quelconque élément système, alors il en est retiré.
-
 int kill(int pid) {
     // Si ce processus était bloqué dans une file d'attente pour un quelconque élément système
     if(pid <= 0 || pid >= MAX_PROCESS || tableDesProcs[pid] == NULL ){
         return -1;
     }
-    else {
-        Processus * proc = tableDesProcs[pid];
-        // Gestion de l'elu avec une comparaison de pointeur (on sais jamais)
-        if(proc == ProcElu){
+
+    Processus * proc = tableDesProcs[pid];
+    // Gestion de l'elu avec une comparaison de pointeur (on sais jamais)
+    if(proc == ProcElu){
+        proc->etat = MOURANT;
+        if (proc->pere != NULL){
+            proc->etat = ZOMBIE;
+            
+        } else {
             proc->etat = MOURANT;
-            if (proc->pere != NULL){
-                proc->etat = ZOMBIE;
-                
-            } else {
-                proc->etat = MOURANT;
-            }
-            ordonnanceur();
         }
-        else if (proc->etat == ACTIVABLE) {
-            // si il est dans la liste des activable on le tue
-            queue_del(proc, chainage);
-            if (proc->pere != NULL){
-                proc->etat = ZOMBIE;
-            } else {
-                proc->etat = MOURANT;
-                queue_add(proc, &proc_mourants, Processus, chainage, prio);
-            }
-        }
-        else if (proc->etat == ATTEND){
+        ordonnanceur();
+    }
+    else if (proc->etat == ACTIVABLE) {
+        // si il est dans la liste des activable on le tue
+        queue_del(proc, chainage);
+        if (proc->pere != NULL){
+            proc->etat = ZOMBIE;
+        } else {
             proc->etat = MOURANT;
             queue_add(proc, &proc_mourants, Processus, chainage, prio);
         }
-        return 0;
     }
+    else if (proc->etat == ATTEND){
+        proc->etat = MOURANT;
+        queue_add(proc, &proc_mourants, Processus, chainage, prio);
+    }
+    return 0;
+    
 }
 
 /*************Filiation**************/
