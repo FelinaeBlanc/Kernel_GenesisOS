@@ -19,6 +19,12 @@ void init_traitant_IT(uint32_t num_IT, void (*traitant)(void));
 
 void affiche_date();
 
-uint32_t nbr_secondes();
+//Retourne le nombre d'interruptions d'horloge depuis le démarrage du noyau.
+unsigned long current_clock();
+
+//Retourne dans *quartz la fréquence du quartz du système et dans *ticks 
+//le nombre d'oscillations du quartz entre chaque interruption.
+void clock_settings(unsigned long *quartz, unsigned long *ticks);
+
 
 #endif

@@ -237,7 +237,7 @@ void ordonnanceur(void){
                 queue_add(procEluActuel, &proc_mourants, Processus, chainage, prio);
                 break;
             case ZOMBIE: // On ne doit pas rajouter dans la liste si Zombie ou Attend
-            case ATTEND:
+            case ATTEND_FILS:
                 break;
             default: // Est activable sinon !
                 procEluActuel->etat = ACTIVABLE;
@@ -271,18 +271,18 @@ void init_ordonnanceur(){
 }
 
 /*******Endormi******/
-void dors(uint32_t nbr_secs){
-    // On assume que IDLE n'appelle jamais DORS 
+void wait_clock(unsigned long ticks){
+    // On assume que IDLE n'appelle jamais wait_clock 
 
     Processus * procEndormir = ProcElu;
     procEndormir->etat = ENDORMI;
-    procEndormir->secReveille = nbr_secondes()+nbr_secs; // On ajoute le temps de réveil
+    procEndormir->secReveille = current_clock()+ticks; // On ajoute le temps de réveil
     
     ordonnanceur();
 }
 
 
-void verifie_reveille(uint32_t secSystem) {
+void verifie_reveille(unsigned long ticks) {
     Processus *current;
     Processus *next;
 
@@ -290,7 +290,7 @@ void verifie_reveille(uint32_t secSystem) {
     queue_for_each(current, &proc_endormis, Processus, chainage) {
         // Sauvegarder le pointeur vers l'élément suivant car 'current' peut être modifié dans le corps de la boucle
         next = queue_entry(current->chainage.prev, Processus, chainage);
-        if (current->secReveille <= secSystem){
+        if (current->secReveille <= ticks){
             // On le réveille !
             current->etat = ACTIVABLE;
             queue_del(current, chainage);
@@ -311,7 +311,7 @@ void fin_processus(void){
     if (procMort->pere != NULL){
         procMort->etat = ZOMBIE;
 
-        if (procMort->pere->etat == ATTEND){
+        if (procMort->pere->etat == ATTEND_FILS){
             printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
             procMort->pere->etat = ACTIVABLE;
             queue_add(procMort->pere, &proc_activables, Processus, chainage, prio);
@@ -344,22 +344,23 @@ int kill(int pid) {
         }
         ordonnanceur();
     }
-    else if (proc->etat == ACTIVABLE) {
+    else if (proc->etat == ACTIVABLE || proc->etat == ENDORMI || proc->etat == ATTEND_FILS) {
         // si il est dans la liste des activable on le tue
         queue_del(proc, chainage);
         if (proc->pere != NULL){
             proc->etat = ZOMBIE;
+            if(proc->pere->etat == ATTEND_FILS){
+                proc->pere->etat = ACTIVABLE;
+                queue_add(proc->pere, &proc_activables, Processus, chainage, prio);
+            }
+            
         } else {
             proc->etat = MOURANT;
             queue_add(proc, &proc_mourants, Processus, chainage, prio);
         }
     }
-    else if (proc->etat == ATTEND){
-        proc->etat = MOURANT;
-        queue_add(proc, &proc_mourants, Processus, chainage, prio);
-    }
+
     return 0;
-    
 }
 
 /*************Filiation**************/
@@ -379,7 +380,7 @@ int waitpid(int pid, int *retvalp){
             return -1;
         }
         while(proc->etat != ZOMBIE){
-            ProcElu->etat = ATTEND;
+            ProcElu->etat = ATTEND_FILS;
             ordonnanceur();
         }
 
@@ -401,7 +402,7 @@ int waitpid(int pid, int *retvalp){
             if (procFils != NULL){
                 break;
             } else {
-                ProcElu->etat = ATTEND;
+                ProcElu->etat = ATTEND_FILS;
                 ordonnanceur(); // On attend
             }
         }

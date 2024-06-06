@@ -27,19 +27,20 @@ uint8_t lit_CMOS(uint8_t reg){
     return dec;
 }
 
-uint16_t nb_tic = 0;
-uint16_t nb_sec = 0;
+unsigned long ticks = 0;
+uint16_t cpt_ticks = 0;
 
-uint32_t secondes = 0;
-uint32_t minutes = 0;
-uint32_t heures = 0;
+unsigned long  secondes = 0;
+unsigned long  minutes = 0;
+unsigned long  heures = 0;
+
 void tic_PIT(void) {
     outb(0x20, 0x20);  // Accusé de réception de l'interruption
-    nb_tic++;
+    ticks++;
+    cpt_ticks++;
     
-    if (nb_tic == 50) {
-        
-        nb_tic = 0;
+    if (cpt_ticks == 50) {
+        cpt_ticks = 0;
         secondes++;
 
         if (secondes == 60) {
@@ -51,18 +52,25 @@ void tic_PIT(void) {
             minutes = 0;
             heures++;
         }
-        //printf("Temps: %s\n", timeString);
-        verifie_reveille(nbr_secondes());
     }
     char timeString[LARGEUR];
-    sprintf(timeString, "%02d:%02d:%02d", heures, minutes, secondes);
+    sprintf(timeString, "%02ld:%02ld:%02ld", heures, minutes, secondes);
     ecrit_temps(timeString, 8);
 
+    verifie_reveille(ticks);
     ordonnanceur();
 }
 
-uint32_t nbr_secondes(){
-    return heures*3600+minutes*60+secondes;
+//Retourne le nombre d'interruptions d'horloge depuis le démarrage du noyau.
+unsigned long current_clock(){
+    return ticks;
+}
+
+//Retourne dans *quartz la fréquence du quartz du système et dans *ticks 
+//le nombre d'oscillations du quartz entre chaque interruption.
+void clock_settings(unsigned long *quartz, unsigned long *ticks){
+    *quartz = QUARTZ;
+    *ticks = SCHEDFREQ;
 }
 
 void traitant_IT_32();

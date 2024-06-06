@@ -12,7 +12,7 @@
 
 extern bool is_idle_started;
 
-enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND };
+enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS };
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 typedef struct _PidLibre {
@@ -73,11 +73,11 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
 // tête des processus endormis !
 extern Processus * ProcDortTete;
 
-void dors(uint32_t nbr_secs);
+void wait_clock(unsigned long ticks);
 
 void insert_endormi(Processus *proc);
 
-void verifie_reveille(uint32_t);
+void verifie_reveille(unsigned long ticks);
 
 /*****Exit*****/
 
