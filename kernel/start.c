@@ -43,7 +43,10 @@ void kernel_start(void)
 
     init_ordonnanceur(); // Init l'ordonnanceur
     
-    cree_processus(&idle,"idle");
+    cree_processus(&idle, 0,"idle");
+    cree_processus(&proc1, 1,"proc1");
+    cree_processus(&proc2, 1,"proc2");
+    cree_processus(&proc3, 1,"proc3");
     init_traitant_IT(32, traitant_IT_32);
 
     idle();
