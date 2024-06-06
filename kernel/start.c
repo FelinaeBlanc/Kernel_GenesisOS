@@ -6,8 +6,9 @@
 #include "string.h"
 #include "horloge.h"
 
-void idle() {
-  // printf("JE SUIS DANS IDLE\n");
+int idle() {
+  printf("JE SUIS ENTREE DANS IDLE\n");
+  is_idle_started = true;
   for (;;) {
     sti(); // usage de sti et cli avant la phase 5 (possible après)
     hlt(); // autre exception possible: le code de vos tests
@@ -15,7 +16,27 @@ void idle() {
   }
 }
 
-struct Processus * ProcIdle;
+/**TEST FNC**/
+//Fonction pour afficher l'état de chaque processus
+int proc_test_enfant(){
+    printf("proc_test enfant [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+    getpid());
+    dors(2);
+    printf("Finittt proc test enfant\n ");
+    return 0;
+}
+int proc_test_a(){
+    printf("proc_test_a [temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(),
+          getpid());
+    int pid = start(&proc_test_enfant, SIZE_PILE_EXEC, 4, "proc_test_enfant", NULL);
+    int retval;
+    printf("Attend enfant...");
+    pid = waitpid(pid, &retval);
+    printf("enfant finit!!! pid = %i\n", pid);
+          dors(2);
+    return 0;
+}
+
 void kernel_start(void)
 {
     printf("\f");
@@ -25,10 +46,13 @@ void kernel_start(void)
 
     init_ordonnanceur(); // Init l'ordonnanceur
     
-    int pid_idle = cree_processus(&idle,IDLE,"idle");
-    ProcIdle = tableDesProcs[pid_idle];
+    start(&idle, SIZE_PILE_EXEC, 0, "idle", NULL);
+    //start(&proc1, SIZE_PILE_EXEC, 1, "proc1", NULL);
+    start(&proc_test_a, SIZE_PILE_EXEC, 1, "proc_test_a", NULL);
+    //start(&proc3, SIZE_PILE_EXEC, 2, "proc3", NULL);
 
     init_traitant_IT(32, traitant_IT_32);
+
 
     idle();
 

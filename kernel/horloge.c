@@ -10,12 +10,15 @@
 #include "stdbool.h"
 #include "processus.h"
 
+
 void ecrit_temps(char *s, int len){
 
     for(int i=0; i<len; i++){
         ecrit_car(0, LARGEUR-len +i, BLANC, NOIR, FALSE, s[i]);
     }
 }
+// Ecrit la liste (en haut à droite) ligne par ligne, en commençant par la ligne 2 en affichant pid, status etc...
+// utilise queue_for_each_prev pour parcourir la liste
 
 uint8_t lit_CMOS(uint8_t reg){
     outb(0x80 | reg, 0x70);
@@ -34,7 +37,6 @@ void tic_PIT(void) {
     outb(0x20, 0x20);  // Accusé de réception de l'interruption
     nb_tic++;
     
-    ordonnanceur();
     if (nb_tic == 50) {
         
         nb_tic = 0;
@@ -51,12 +53,12 @@ void tic_PIT(void) {
         }
         //printf("Temps: %s\n", timeString);
         verifie_reveille(nbr_secondes());
-
-        char timeString[LARGEUR];
-        sprintf(timeString, "%02d:%02d:%02d", heures, minutes, secondes);
-        ecrit_temps(timeString, 8);
     }
-    
+    char timeString[LARGEUR];
+    sprintf(timeString, "%02d:%02d:%02d", heures, minutes, secondes);
+    ecrit_temps(timeString, 8);
+
+    ordonnanceur();
 }
 
 uint32_t nbr_secondes(){

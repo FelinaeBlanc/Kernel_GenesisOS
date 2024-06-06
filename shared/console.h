@@ -9,6 +9,7 @@
 
 #define LARGEUR 80
 #define HAUTEUR 25
+#define LIGNE_DEPART 10
 
 // Les couleurs de texte et de fond
 #define NOIR 0x00
