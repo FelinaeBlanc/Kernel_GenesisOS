@@ -5,7 +5,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "horloge.h"
-//#include "files.h"
+#include "files.h"
 #include "test.h"
 
 int idle() {
@@ -17,10 +17,40 @@ int idle() {
   }
 }
 
-int proc_runner(){
+/*int proc_runner(){
   printf("proc runner !\n");
   test_run(4);
   printf("Proc runner fini\n");
+  return 0;
+}*/
+
+int proc_files_a(void * arg){
+  printf("Ok prend la main\n");
+  int fid = pcreate(2);
+  psend(fid, 1);
+  psend(fid, 2);
+  psend(fid, 3);
+  psend(fid, 4);
+  printf("REPREND LA MAIN ca marche ? fid:%d \n",fid);
+  arg = arg;
+  return 0;
+}
+
+int proc_files_b(void * arg){
+  printf("Proc fils b");
+  arg = arg;
+  int msg;
+  preceive(9,&msg);
+  printf("1- preceive:%d\n",msg);
+
+  preceive(9,&msg);
+  printf("2- preceive:%d\n",msg);
+
+    preceive(9,&msg);
+  printf("3- preceive:%d\n",msg);
+
+    preceive(9,&msg);
+  printf("4- preceive:%d\n",msg);
   return 0;
 }
 
@@ -34,9 +64,10 @@ void kernel_start(void)
   sign_clock(); // active l'interruption de l'horloge
 
   init_ordonnanceur(); // Init l'ordonnanceur
-  //init_files(); // Init les files !
+  init_files(); // Init les files !
 
-  start(&proc_runner, SIZE_PILE_EXEC, 128, "proc_runner", NULL);
+  start(&proc_files_a, SIZE_PILE_EXEC, 10, "proc_runner", NULL);
+  start(&proc_files_b, SIZE_PILE_EXEC, 2, "proc_runner", NULL);
   init_traitant_IT(32, traitant_IT_32);
 
   idle();

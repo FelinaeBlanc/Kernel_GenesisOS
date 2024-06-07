@@ -1,6 +1,3 @@
-#ifndef __PROCESSUS_H__
-#define __PROCESSUS_H__
-
 #include "stdint.h"
 #include "processus.h"
 #include "stddef.h"
@@ -173,7 +170,7 @@ int chprio(int pid, int newPrio) {
         if (ProcElu->prio < newPrio){
             ordonnanceur();
         }
-    }  else if (proc->etat == ATTEND_FILE){
+    } else if (proc->etat == ATTEND_FILE){
         int fid = proc->fid;
         assert(isFidValideAndExist(fid));
         File * file = tableauFile[fid];
@@ -458,5 +455,3 @@ int waitpid(int pid, int *retvalp){
     }
     return procPid;
 }
-
-#endif

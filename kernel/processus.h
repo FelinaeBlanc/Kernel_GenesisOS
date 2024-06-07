@@ -53,43 +53,45 @@ struct Fils {
 };
 
 // Déclaration des variables globales de processus
+extern struct list_link proc_activables;
+
 extern Processus * ProcIdle;
 extern Processus * ProcElu;
 extern Processus * tableDesProcs[MAX_PROCESS];
 
 /* Fonction control switch */
-void ctx_sw(int *, int *);
+extern void ctx_sw(int *, int *);
 /* Fonction de retour qui appel exit avec %eax en argument*/
-void exit_routine(void);
+extern void exit_routine(void);
 
-void init_ordonnanceur(void);
-void ordonnanceur(void);
+extern void init_ordonnanceur(void);
+extern void ordonnanceur(void);
 
 int getpid(void);
 char *mon_nom(void);
 
 // Fonctions de prio
-int getprio(int pid);
-int chprio(int pid, int newprio);
+extern int getprio(int pid);
+extern int chprio(int pid, int newprio);
 
-int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
+extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
 
 /******Edormi******/
 
-void wait_clock(unsigned long ticks);
+extern void wait_clock(unsigned long ticks);
 
-void insert_endormi(Processus *proc);
+extern void insert_endormi(Processus *proc);
 
-void verifie_reveille(unsigned long ticks);
+extern void verifie_reveille(unsigned long ticks);
 
 /*****Exit*****/
 
-void exit(int retval);
+extern void exit(int retval);
 
-int kill(int pid);
+extern int kill(int pid);
 
 /**** Fonction Filiation ****/
 
-int waitpid(int, int *);
+extern int waitpid(int, int *);
 
 #endif

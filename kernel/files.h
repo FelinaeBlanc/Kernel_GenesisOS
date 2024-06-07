@@ -1,7 +1,6 @@
 #ifndef FILES_H
 #define FILES_H
 
-#include "processus.h"
 #include "queue.h"
 #include "stdbool.h"
 
@@ -29,7 +28,7 @@ typedef struct _File {
 } File;
 
 
-File * tableauFile[NBQUEUE];
+extern File * tableauFile[NBQUEUE];
 
 /**
 
@@ -41,27 +40,27 @@ File * tableauFile[NBQUEUE];
     pcount : renvoie l'état courant d'une file
 
 **/
-void init_files(void);
+extern void init_files(void);
 
 // crée une file de messages
-int pcreate(int count);
+extern int pcreate(int count);
 
 // détruit une file de messages
-int pdelete(int fid);
+extern int pdelete(int fid);
 
 
 // La primitive psend envoie le message dans la file identifiée par fid
-int psend(int fid, int message);
+extern int psend(int fid, int message);
 
 // retire un message d'une file
-int preceive(int fid,int *message);
+extern int preceive(int fid,int *message);
 
 // réinitialise une file
-int preset(int fid);
+extern int preset(int fid);
 
 // La primitive pcount lit la quantité de données et de processus en attente sur la file fid.
-int pcount(int fid, int *count);
+extern int pcount(int fid, int *count);
 
-bool isFidValideAndExist(int fid);
+extern bool isFidValideAndExist(int fid);
 
 #endif

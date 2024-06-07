@@ -1,11 +1,14 @@
-#include "processus.c"
+#include "processus.h"
 #include "files.h"
 #include "stdbool.h"
 #include "queue.h"
 #include "horloge.h"
 #include "mem.h"
 
+File * tableauFile[NBQUEUE];
+
 LIST_HEAD(fid_liste);
+
 // Ajoute un fid libre
 void add_fid(int fid){
     FidLibre * new_fid = mem_alloc(sizeof(FidLibre));
@@ -31,17 +34,19 @@ void init_files(){
     INIT_LIST_HEAD(&fid_liste);
 
     for (int i = 0; i < NBQUEUE; i++){
-        new_fid(i);
+        add_fid(i);
     }
 }
 
 void add_msg(File * f, int message){
-    assert(f->nbMsg < f->maxMsg);
+    if (f->nbMsg >= f->maxMsg){
+        printf("bruh");
+    }
 
     Message * new_msg = mem_alloc(sizeof(Message));
     new_msg->message = message;
     new_msg->place = (f->maxMsg - f->nbMsg); // place dans la file (ordre decroissant)
-    queue_add(new_msg, &f->queueMsg, Message, chainage, message);
+    queue_add(new_msg, &f->queueMsg, Message, chainage, place);
     f->nbMsg++;
 }
 int retire_msg(File * f){
@@ -235,7 +240,8 @@ int psend(int fid, int message){
         if (!ProcElu->isOperationSuccess){ // L'opération a échouer (pdelete ou preset a été appelé)
             return -1;
         }
-        add_msg(f, message);
+
+        //add_msg(f, message);
     } else {
         /*--Sinon, la file n'est pas pleine et aucun processus n'est bloqué en attente 
         de message. Le message est alors déposé directement dans la file.*/
@@ -298,7 +304,7 @@ int preceive(int fid,int *message){
         preset ou pdelete. 
         Dans ce cas, la valeur de retour de preceive est strictement négative.
         */
-        // la file s'est remplie... On vérifie si l'opération a réussi
+        // L'opération a terminé... On vérifie si l'opération a réussi
         if (!ProcElu->isOperationSuccess){ // L'opération a échouer (pdelete ou preset a été appelé)
             return -1;
         }
