@@ -5,6 +5,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "horloge.h"
+#include "test.h"
 
 int idle() {
   printf("JE SUIS ENTREE DANS IDLE\n");
@@ -34,6 +35,8 @@ int proc_b(){
 
 void kernel_start(void)
 {
+  void * arg = (void *) (1);
+  
     printf("\f");
     /* Afichage de l'horloge */
     reg_frequence(); 
@@ -42,14 +45,12 @@ void kernel_start(void)
     init_ordonnanceur(); // Init l'ordonnanceur
     
     start(&idle, SIZE_PILE_EXEC, 0, "idle", NULL);
-    start(&proc_a, SIZE_PILE_EXEC, 1, "proc_a", NULL);
-    start(&proc_b, SIZE_PILE_EXEC, 1, "proc_b", NULL);
-    //start(&proc3, SIZE_PILE_EXEC, 2, "proc3", NULL);
+    start(&test_run, SIZE_PILE_EXEC, 128, "idle", arg);
+    
 
     init_traitant_IT(32, traitant_IT_32);
 
     idle();
-
     while(1)
         hlt();
 

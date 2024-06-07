@@ -38,7 +38,7 @@ typedef struct _Processus {
     link chainage; // chainage pour les liaisons avec ordre de priorité
     struct Fils * FilsTete; // Liste des fils
 
-    int retvalp;
+    int retval;
     struct _Processus * pere;
 } Processus;
 
@@ -81,7 +81,7 @@ void verifie_reveille(unsigned long ticks);
 
 /*****Exit*****/
 
-void fin_processus(void);
+void exit(int retval);
 
 int kill(int pid);
 

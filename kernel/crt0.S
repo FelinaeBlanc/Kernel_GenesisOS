@@ -192,3 +192,19 @@ pgtabio:
 	.long	0xfe6c001B	
 	.fill 1023,4,0
 */
+
+#define UNIMPLEMENTED(X) \
+	.weak X			;\
+X##:\
+	ret
+UNIMPLEMENTED(sys_info)
+UNIMPLEMENTED(cons_write)
+UNIMPLEMENTED(cons_echo)
+UNIMPLEMENTED(cons_read)
+UNIMPLEMENTED(psend)
+UNIMPLEMENTED(preceiv)
+UNIMPLEMENTED(pcreate)
+UNIMPLEMENTED(pdelete)
+UNIMPLEMENTED(pcount)
+UNIMPLEMENTED(preset)
+UNIMPLEMENTED(preceive)

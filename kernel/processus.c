@@ -35,8 +35,6 @@ void init_listes(void) {
     INIT_LIST_HEAD(&proc_activables);
     INIT_LIST_HEAD(&proc_endormis);
     INIT_LIST_HEAD(&proc_mourants);
-
-    printf("Listes initialisées\n");
 }
 
 // retourne le pid en tete (PidLibreTete), déplace la tete ensuite
@@ -92,15 +90,22 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
         proc->etat = ACTIVABLE;
         proc->secReveille = 0;
         proc->prio = prio;
+
+        proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
+        proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit; // Ret adresse
+        proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
+
         // on gere les adresses de retour
-        proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-2];
-        proc->pile[SIZE_PILE_EXEC - 1] = (int32_t)fin_processus;
-        proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)pt_func;
-
-        // gestion des arguments
-        //proc->pile[SIZE_PILE_EXEC - 3 ] = (int32_t)arg;
-        arg = arg;
-
+        proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+        proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+        
+        /*
+            movl %ebx, (%eax)
+            movl %esp, 4(%eax)
+            movl %ebp, 8(%eax)
+            movl %esi, 12(%eax)
+            movl %edi, 16(%eax)
+        */
         // on ajoute le processus à la table des processus
         tableDesProcs[pid] = proc;
 
@@ -112,7 +117,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
         }
         
         if (ProcElu != NULL){ // Ajoute le parent si c'est pas idle
-            printf("Fils ajouté parent: %s enfant: %s\n", ProcElu->nom, proc->nom);
+            //printf("Fils ajouté parent: %s enfant: %s\n", ProcElu->nom, proc->nom);
             add_fils(ProcElu, proc);
             
             queue_add(proc, &proc_activables, Processus, chainage, prio);
@@ -175,14 +180,15 @@ int chprio(int pid, int newPrio) {
         if (newPrio < procActiablePrio->prio){
             ordonnanceur();
         }
-    } else { // Si c'est pas l'élu, on le replace dans la liste
+    } else if (proc->etat == ACTIVABLE) { // Si c'est pas l'élu, on le replace dans la liste mais qu'il est activable !!!!
         queue_del(proc, chainage);
         queue_add(proc, &proc_activables, Processus, chainage, prio);
 
         if (ProcElu->prio < newPrio){
             ordonnanceur();
         }
-    }
+    }  
+    // ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS
     return anciennePrio;
 }
 
@@ -208,7 +214,7 @@ void free_childs(Processus * proc){
 void free_mourant_queue(){
     Processus * procMort;
     while ((procMort = queue_out(&proc_mourants, Processus, chainage)) != NULL){
-        printf("Je suis mort %s\n", procMort->nom);
+        // printf("Je suis mort %s\n", procMort->nom);
 
         free_childs(procMort); // On libère les fils
 
@@ -303,25 +309,27 @@ void verifie_reveille(unsigned long ticks) {
 }
 
 /*****Exit*****/
-// void exit(int retval);
 // etval est passée à son père quand il appelle waitpid
-void fin_processus(void){
+void exit(int retval){
     Processus * procMort = ProcElu;
-    printf("fin_processus Je suis mort %s\n", procMort->nom);
+    // printf("fin_processus Je suis mort %s\n", procMort->nom);
     if (procMort->pere != NULL){
         procMort->etat = ZOMBIE;
 
         if (procMort->pere->etat == ATTEND_FILS){
+            // retourner la retval au pere
             printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
+            procMort->pere->retval = retval;
             procMort->pere->etat = ACTIVABLE;
             queue_add(procMort->pere, &proc_activables, Processus, chainage, prio);
         }
         
     } else {
         procMort->etat = MOURANT;
-        // queue_add(procMort, &proc_mourants, Processus, chainage, prio);
     }
     ordonnanceur();
+
+    while(1);
 }
 
 // La primitive kill termine le processus identifié par la valeur pid. Si ce processus était bloqué dans une file 
@@ -420,7 +428,7 @@ int waitpid(int pid, int *retvalp){
     }
     // On copy les valeurs du processus enfant
     int procPid = proc->pid;
-    int retval = proc->retvalp;
+    int retval = proc->retval;
 
     // On libère le processus enfant
     queue_add(proc, &proc_mourants, Processus, chainage, prio);
