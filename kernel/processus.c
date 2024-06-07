@@ -79,11 +79,11 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
    
     if (prio<=0 || prio > PRIO_MAX){ return -1; }
     
-    if( ssize < 5 || ssize > MAX_SIZE_PILE){
+    if( ssize > MAX_SIZE_PILE){
         return -1;
     }
     
-    ssize += 5*8; 
+
     Processus * proc = mem_alloc(sizeof(Processus));
     // on gere les attribus
     strcpy(proc->nom, name);
@@ -92,12 +92,15 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     proc->secReveille = 0;
     proc->prio = prio;
 
-    proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
-    proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit_routine; // Ret adresse
-    proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
+
+    unsigned long stacksize = ssize+5;
+    proc->pile = mem_alloc(stacksize*sizeof(int32_t));
+    proc->pile[ - 1 ] = (int32_t)arg;  // gestion des arguments
+    proc->pile[stacksize - 2] = (int32_t)exit_routine; // Ret adresse
+    proc->pile[stacksize - 3] = (int32_t)pt_func;
 
     // on gere les adresses de retour
-    proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+    proc->contexte[1] = (int32_t)&proc->pile[stacksize-3];
     //proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
     
 
@@ -115,9 +118,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     queue_add(proc, &proc_activables, Processus, chainage, prio);
 
     // affiche_table_process();
-    ordonnanceur();
-    
-    
+    ordonnanceur();   
     return pid;
 }
 
@@ -125,6 +126,7 @@ int getpid(void){
     // return pid de pro elu
     return ProcElu != NULL ? ProcElu->pid :  -1;
 }
+
 char *mon_nom(void){
     // return nom du pro elu
     return ProcElu != NULL ? ProcElu->nom : "No Proc";
@@ -156,6 +158,10 @@ int chprio(int pid, int newPrio) {
     }
 
     int anciennePrio = proc->prio;
+    if(anciennePrio == newPrio) {
+        return anciennePrio;
+    }
+
     proc->prio = newPrio;
     
     Processus *procActiablePrio = queue_top(&proc_activables, Processus, prio);
@@ -165,7 +171,7 @@ int chprio(int pid, int newPrio) {
         if (newPrio < procActiablePrio->prio){
             ordonnanceur();
         }
-    } else if (proc->etat == ACTIVABLE) { // Si c'est pas l'élu, on le replace dans la liste mais qu'il est activable !!!!
+    } else if (proc->etat == ACTIVABLE ) { // Si c'est pas l'élu, on le replace dans la liste mais qu'il est activable !!!!
         queue_del(proc, chainage);
         queue_add(proc, &proc_activables, Processus, chainage, prio);
 

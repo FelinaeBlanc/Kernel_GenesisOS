@@ -7,7 +7,7 @@
 
 #define MAX_PROCESS 50
 #define SIZE_PILE_EXEC 4096
-#define MAX_SIZE_PILE 8000
+#define MAX_SIZE_PILE 8192
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
 
@@ -32,7 +32,7 @@ typedef struct _Processus {
     
     // Pile
     int32_t contexte[5];  // Array to hold the saved registers (ebx, esp, ebp, esi, edi)
-    int32_t pile[SIZE_PILE_EXEC];  // Stack for the process
+    int32_t * pile;  // Stack for the process
     // chainage + filiation
     link chainage; // chainage pour les liaisons avec ordre de priorité
     struct Fils * FilsTete; // Liste des fils
