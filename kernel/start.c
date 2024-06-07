@@ -18,25 +18,26 @@ int idle() {
 }
 
 
-int proc_a(){
-    printf("proc_a [temps = %lu] processus %s pid = %i\n", current_clock(), mon_nom(),
-        getpid());
-    wait_clock(500);
-    return 0;
+// Fonction pour afficher l'état de chaque processus
+int proc_test_enfant(){
+    printf("proc_test enfant [temps = %lu] processus %s pid = %i\n", current_clock(), mon_nom(),
+    getpid());
+    return 4;
 }
-
-int proc_b(){
-  printf("proc_b [temps = %lu] processus %s pid = %i\n", current_clock(), mon_nom(),
-        getpid());
-  wait_clock(1);
-  return 0;
+int proc_test_a(){
+    printf("proc_test a [temps = %lu] processus %s pid = %i\n", current_clock(), mon_nom(),
+          getpid());
+    int pid = start(&proc_test_enfant, SIZE_PILE_EXEC, 2, "proc_test_enfant", NULL);
+    int retval;
+    pid = waitpid(pid, &retval);
+    printf("enfant pid = %i et %d\n", pid,retval);
+    return 0;
 }
 
 
 void kernel_start(void)
 {
-  void * arg = (void *) (1);
-  
+
     printf("\f");
     /* Afichage de l'horloge */
     reg_frequence(); 
@@ -45,14 +46,12 @@ void kernel_start(void)
     init_ordonnanceur(); // Init l'ordonnanceur
     
     start(&idle, SIZE_PILE_EXEC, 0, "idle", NULL);
-    start(&test_run, SIZE_PILE_EXEC, 128, "idle", arg);
-    
+    //start(&test_run, SIZE_PILE_EXEC, 128, "idle", arg);
+    start(&proc_test_a, SIZE_PILE_EXEC, 1, "proc_test_a", NULL);
 
     init_traitant_IT(32, traitant_IT_32);
 
     idle();
-    while(1)
-        hlt();
 
     return;
 }

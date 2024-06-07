@@ -92,7 +92,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
         proc->prio = prio;
 
         proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
-        proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit; // Ret adresse
+        proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit_routine; // Ret adresse
         proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
 
         // on gere les adresses de retour
@@ -312,6 +312,8 @@ void verifie_reveille(unsigned long ticks) {
 // etval est passée à son père quand il appelle waitpid
 void exit(int retval){
     Processus * procMort = ProcElu;
+    procMort->retval = retval;
+    
     // printf("fin_processus Je suis mort %s\n", procMort->nom);
     if (procMort->pere != NULL){
         procMort->etat = ZOMBIE;
@@ -319,7 +321,6 @@ void exit(int retval){
         if (procMort->pere->etat == ATTEND_FILS){
             // retourner la retval au pere
             printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
-            procMort->pere->retval = retval;
             procMort->pere->etat = ACTIVABLE;
             queue_add(procMort->pere, &proc_activables, Processus, chainage, prio);
         }

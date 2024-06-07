@@ -55,6 +55,8 @@ extern Processus * tableDesProcs[MAX_PROCESS];
 
 /* Fonction control switch */
 void ctx_sw(int *, int *);
+/* Fonction de retour qui appel exit avec %eax en argument*/
+void exit_routine(void);
 
 void init_ordonnanceur(void);
 void ordonnanceur(void);
