@@ -9,14 +9,12 @@
 
 int idle() {
   printf("JE SUIS ENTREE DANS IDLE\n");
-  is_idle_started = true;
   for (;;) {
     sti(); // usage de sti et cli avant la phase 5 (possible après)
     hlt(); // autre exception possible: le code de vos tests
     cli(); // JAMAIS de sti ou de cli dans le reste de votre kernel
   }
 }
-
 
 // Fonction pour afficher l'état de chaque processus
 int proc_test_enfant(){

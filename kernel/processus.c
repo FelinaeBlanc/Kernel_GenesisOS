@@ -15,8 +15,6 @@ Processus * tableDesProcs[MAX_PROCESS];
 Processus * ProcIdle;
 Processus * ProcElu;
 
-bool is_idle_started = false;
-
 /********Affichage********/
 void affiche_table_process(){
     for(int i=0; i<MAX_PROCESS; i++){
@@ -227,10 +225,6 @@ void free_mourant_queue(){
 
 /***********END TEST FNC*********/
 void ordonnanceur(void){
-   
-    if (!is_idle_started){ // On attend d'être dans un contexte idle au début
-        return;
-    }
     free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
      
@@ -313,7 +307,7 @@ void verifie_reveille(unsigned long ticks) {
 void exit(int retval){
     Processus * procMort = ProcElu;
     procMort->retval = retval;
-    
+
     // printf("fin_processus Je suis mort %s\n", procMort->nom);
     if (procMort->pere != NULL){
         procMort->etat = ZOMBIE;

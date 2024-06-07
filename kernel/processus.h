@@ -10,8 +10,6 @@
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
 
-extern bool is_idle_started;
-
 enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS };
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
