@@ -1,3 +1,6 @@
+#ifndef __PROCESSUS_H__
+#define __PROCESSUS_H__
+
 #include "stdint.h"
 #include "processus.h"
 #include "stddef.h"
@@ -68,48 +71,52 @@ void add_fils(Processus * pere, Processus * fils){
 // Crée un processus et l'ajoute à la queue des processus activables
 // pile du processus ssize octets utilisables sans compter l'espace nécessaire au stockage de l'adresse de retour
 int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg){
-
+    
     int pid = new_pid();
+    if(pid <= -1){ return -1; }
+    if (ssize > MAX_SIZE_PILE){ return -1; }
 
-    ssize += 5*8; // ssize + la place des param
-    if (prio<=0 || prio > PRIO_MAX){
+   
+    if (prio<=0 || prio > PRIO_MAX){ return -1; }
+    
+    if( ssize < 5 || ssize > MAX_SIZE_PILE){
         return -1;
     }
-
-    if(pid != -1){
-        Processus * proc = mem_alloc(sizeof(Processus));
-        // on gere les attribus
-        strcpy(proc->nom, name);
-        proc->pid = pid;
-        proc->etat = ACTIVABLE;
-        proc->secReveille = 0;
-        proc->prio = prio;
-
-        proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
-        proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit_routine; // Ret adresse
-        proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
-
-        // on gere les adresses de retour
-        proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
-        proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
-        
-
-        // on ajoute le processus à la table des processus
-        tableDesProcs[pid] = proc;
-
-        // gestion des filiation
-        if (ProcElu != ProcIdle){
-            proc->pere = ProcElu; // Le proc ELU est celui qui a creer le fils
-            add_fils(ProcElu, proc);
-        } else {
-            proc->pere = NULL;
-        }
-
-        queue_add(proc, &proc_activables, Processus, chainage, prio);
     
-        //affiche_table_process();
-        ordonnanceur();
+    ssize += 5*8; 
+    Processus * proc = mem_alloc(sizeof(Processus));
+    // on gere les attribus
+    strcpy(proc->nom, name);
+    proc->pid = pid;
+    proc->etat = ACTIVABLE;
+    proc->secReveille = 0;
+    proc->prio = prio;
+
+    proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
+    proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit_routine; // Ret adresse
+    proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
+
+    // on gere les adresses de retour
+    proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+    //proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+    
+
+    // on ajoute le processus à la table des processus
+    tableDesProcs[pid] = proc;
+
+    // gestion des filiation
+    if (ProcElu != ProcIdle){
+        proc->pere = ProcElu; // Le proc ELU est celui qui a creer le fils
+        add_fils(ProcElu, proc);
+    } else {
+        proc->pere = NULL;
     }
+
+    queue_add(proc, &proc_activables, Processus, chainage, prio);
+
+    // affiche_table_process();
+    ordonnanceur();
+    
     
     return pid;
 }
@@ -135,16 +142,16 @@ int getprio(int pid){
 }
 
 int chprio(int pid, int newPrio) {
-    if (pid < 0 || pid >= MAX_PROCESS){ // On vérifie que le pid est valide
+    if (pid <= 0 || pid >= MAX_PROCESS){ // On vérifie que le pid est valide
         return -1;
     }
-    if (newPrio<=0 || newPrio > PRIO_MAX){
+    if (newPrio <= 0 || newPrio > PRIO_MAX){
         //printf("valeur de priorité non conforme");
         return -1;
     }
 
     Processus * proc = tableDesProcs[pid];
-    if (proc == NULL){
+    if (proc == NULL || proc->etat == ZOMBIE){
         return -1;
     }
 
@@ -334,6 +341,10 @@ int kill(int pid) {
     }
 
     Processus * proc = tableDesProcs[pid];
+    if (proc->etat == ZOMBIE){
+        return -1;
+    }
+
     // Gestion de l'elu avec une comparaison de pointeur (on sais jamais)
     if(proc == ProcElu){
         proc->etat = MOURANT;
@@ -419,15 +430,21 @@ int waitpid(int pid, int *retvalp){
         }
         procFils->suiv = procFils->suiv->suiv;
     }
+
     // On copy les valeurs du processus enfant
     int procPid = proc->pid;
     int retval = proc->retval;
 
     // On libère le processus enfant
+    proc->etat = MOURANT;
+    proc->pere = NULL;
     queue_add(proc, &proc_mourants, Processus, chainage, prio);
 
     // On retourne les valeur du processus enfant trouvé !
-    *retvalp = retval;
+    if (retvalp != NULL){
+        *retvalp = retval;
+    }
     return procPid;
 }
 
+#endif

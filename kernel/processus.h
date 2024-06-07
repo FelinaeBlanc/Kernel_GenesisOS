@@ -5,8 +5,9 @@
 #include "queue.h"
 #include "stdbool.h"
 
-#define MAX_PROCESS 10
-#define SIZE_PILE_EXEC 512
+#define MAX_PROCESS 50
+#define SIZE_PILE_EXEC 4096
+#define MAX_SIZE_PILE 8000
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
 
@@ -38,6 +39,8 @@ typedef struct _Processus {
 
     int retval;
     struct _Processus * pere;
+
+    int fileValue; // Valeur de la file
 } Processus;
 
 
@@ -69,9 +72,6 @@ int chprio(int pid, int newprio);
 int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
 
 /******Edormi******/
-
-// tête des processus endormis !
-extern Processus * ProcDortTete;
 
 void wait_clock(unsigned long ticks);
 
