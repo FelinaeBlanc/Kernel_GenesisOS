@@ -68,15 +68,11 @@ void add_fils(Processus * pere, Processus * fils){
 // Crée un processus et l'ajoute à la queue des processus activables
 // pile du processus ssize octets utilisables sans compter l'espace nécessaire au stockage de l'adresse de retour
 int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg){
+
     int pid = new_pid();
 
     ssize += 5*8; // ssize + la place des param
-    if (prio<0 || prio > PRIO_MAX){
-        return -1;
-    }
-
-    if(prio == PRIO_IDLE && pid != 0 ){
-        printf("Cannot assigne the min priority to a process other thant IDLE\n");
+    if (prio<=0 || prio > PRIO_MAX){
         return -1;
     }
 
@@ -97,40 +93,24 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
         proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
         proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
         
-        /*
-            movl %ebx, (%eax)
-            movl %esp, 4(%eax)
-            movl %ebp, 8(%eax)
-            movl %esi, 12(%eax)
-            movl %edi, 16(%eax)
-        */
+
         // on ajoute le processus à la table des processus
         tableDesProcs[pid] = proc;
 
         // gestion des filiation
         if (ProcElu != ProcIdle){
             proc->pere = ProcElu; // Le proc ELU est celui qui a creer le fils
+            add_fils(ProcElu, proc);
         } else {
             proc->pere = NULL;
         }
-        
-        if (ProcElu != NULL){ // Ajoute le parent si c'est pas idle
-            //printf("Fils ajouté parent: %s enfant: %s\n", ProcElu->nom, proc->nom);
-            add_fils(ProcElu, proc);
-            
-            queue_add(proc, &proc_activables, Processus, chainage, prio);
-            if (proc->prio > ProcElu->prio){
-                ordonnanceur();
-            }
 
-        } else { // Le 1er processus est idle !
-            ProcElu = proc;
-            ProcIdle = proc;
-            proc->etat = ELU;
-        }
-
-        
+        queue_add(proc, &proc_activables, Processus, chainage, prio);
+    
+        //affiche_table_process();
+        ordonnanceur();
     }
+    
     return pid;
 }
 
@@ -229,6 +209,7 @@ void ordonnanceur(void){
     Processus * procEluActuel = ProcElu;
      
     if (!queue_empty(&proc_activables)) {
+        
         switch (procEluActuel->etat) {
             case ENDORMI:
                 queue_add(procEluActuel, &proc_endormis, Processus, chainage, secReveille);
@@ -255,19 +236,36 @@ void ordonnanceur(void){
 
 void init_ordonnanceur(){
 
+    // On initialise la liste des pid libre
     PidLibre * pLibre = mem_alloc(sizeof(PidLibre));
-    pLibre->pid = 0;
-    
+    pLibre->pid = 1;
+
     PidLibreTete = pLibre;
-    
-    for (int i=1;i<MAX_PROCESS;i++){
+    for (int i=2;i<MAX_PROCESS;i++){
         PidLibre * pLibresuiv = mem_alloc(sizeof(PidLibre));
         pLibresuiv->pid = i;
         pLibre->suivPid = pLibresuiv;
         pLibre = pLibresuiv;
     }
-
+    
     init_listes();
+
+    // On initialise le processus Idle
+    // start implicite de idle 
+    Processus * proc = mem_alloc(sizeof(Processus));
+
+    // on gere les attribus
+    strcpy(proc->nom, "IDLE");
+    proc->pid = 0;
+    proc->etat = ELU;
+    proc->secReveille = 0;
+    proc->prio = PRIO_IDLE;
+
+    tableDesProcs[0] = proc;
+
+    ProcIdle = proc;
+    ProcElu = proc;
+    //affiche_table_process();
 }
 
 /*******Endormi******/
@@ -314,7 +312,7 @@ void exit(int retval){
 
         if (procMort->pere->etat == ATTEND_FILS){
             // retourner la retval au pere
-            printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
+            // printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
             procMort->pere->etat = ACTIVABLE;
             queue_add(procMort->pere, &proc_activables, Processus, chainage, prio);
         }

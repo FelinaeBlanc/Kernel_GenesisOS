@@ -35,17 +35,17 @@ int proc_test_a(){
 
 void kernel_start(void)
 {
-
+    void * arg =  (int *) 1;
     printf("\f");
     /* Afichage de l'horloge */
     reg_frequence(); 
     sign_clock(); // active l'interruption de l'horloge
-
+    
     init_ordonnanceur(); // Init l'ordonnanceur
     
-    start(&idle, SIZE_PILE_EXEC, 0, "idle", NULL);
-    //start(&test_run, SIZE_PILE_EXEC, 128, "idle", arg);
-    start(&proc_test_a, SIZE_PILE_EXEC, 1, "proc_test_a", NULL);
+    //start(&idle, SIZE_PILE_EXEC, 0, "idle", NULL);
+    start(&proc_test_a, SIZE_PILE_EXEC, 128, "proc_a", arg);
+    //start(&proc_test_a, SIZE_PILE_EXEC, 1, "proc_test_a", NULL);
 
     init_traitant_IT(32, traitant_IT_32);
 
