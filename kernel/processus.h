@@ -6,8 +6,8 @@
 #include "stdbool.h"
 
 #define MAX_PROCESS 50
-#define SIZE_PILE_EXEC 4096
-#define MAX_SIZE_PILE 8000
+#define SIZE_PILE_EXEC 80000
+#define MAX_SIZE_PILE 80000
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
 
@@ -61,6 +61,7 @@ extern Processus * tableDesProcs[MAX_PROCESS];
 
 /* Fonction control switch */
 extern void ctx_sw(int *, int *);
+extern void ctx_ld(int *);
 /* Fonction de retour qui appel exit avec %eax en argument*/
 extern void exit_routine(void);
 

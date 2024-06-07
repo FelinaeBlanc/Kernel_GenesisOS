@@ -17,13 +17,13 @@ int idle() {
   }
 }
 
-/*int proc_runner(){
+int proc_runner(){
   printf("proc runner !\n");
   test_run(4);
-  printf("Proc runner fini\n");
+  printf("Proc runner fini!!!!!!!!!!!!!!!!!!!!!\n");
   return 0;
-}*/
-
+}
+/*
 int proc_files_a(void * arg){
   printf("Ok prend la main\n");
   int fid = pcreate(2);
@@ -52,23 +52,18 @@ int proc_files_b(void * arg){
     preceive(9,&msg);
   printf("4- preceive:%d\n",msg);
   return 0;
-}
+}*/
 
 
 void kernel_start(void)
 {
   //void * arg =  (int *) 1;
   printf("\f");
-  /* Afichage de l'horloge */
-  reg_frequence(); 
-  sign_clock(); // active l'interruption de l'horloge
 
   init_ordonnanceur(); // Init l'ordonnanceur
-  init_files(); // Init les files !
 
-  start(&proc_files_a, SIZE_PILE_EXEC, 10, "proc_runner", NULL);
-  start(&proc_files_b, SIZE_PILE_EXEC, 2, "proc_runner", NULL);
-  init_traitant_IT(32, traitant_IT_32);
+
+  start(&proc_runner, SIZE_PILE_EXEC, 128, "proc_runner", NULL);
 
   idle();
   

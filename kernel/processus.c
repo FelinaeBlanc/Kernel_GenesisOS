@@ -95,9 +95,11 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
 
     // on gere les adresses de retour
+    //proc->contexte[0] = 0;
     proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
-    //proc->contexte[2] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
-    
+    //proc->contexte[2] = 0;//(int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+    //proc->contexte[3] = 0;
+    //proc->contexte[4] = 0;
 
     // on ajoute le processus à la table des processus
     tableDesProcs[pid] = proc;
@@ -245,8 +247,11 @@ void ordonnanceur(void){
         Processus *procEluSuiv = queue_out(&proc_activables, Processus, chainage);
         procEluSuiv->etat = ELU;
         ProcElu = procEluSuiv; 
-        
-        ctx_sw(procEluActuel->contexte, ProcElu->contexte);
+        printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
+
+        ctx_sw(procEluActuel->contexte,ProcElu->contexte);
+
+            //ctx_ld(ProcElu->contexte);
     }
 }
 
@@ -281,6 +286,9 @@ void init_ordonnanceur(){
 
     ProcIdle = proc;
     ProcElu = proc;
+
+    init_files(); // Init les files !
+    init_horloge(); // Init l'horloge après...
     //affiche_table_process();
 }
 

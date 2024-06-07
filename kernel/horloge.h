@@ -26,5 +26,8 @@ unsigned long current_clock();
 //le nombre d'oscillations du quartz entre chaque interruption.
 void clock_settings(unsigned long *quartz, unsigned long *ticks);
 
+extern void init_horloge(void);
+
+//extern void traitant_IT_32();
 
 #endif

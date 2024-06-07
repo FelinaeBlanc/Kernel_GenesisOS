@@ -36,10 +36,11 @@ unsigned long  heures = 0;
 
 void tic_PIT(void) {
     outb(0x20, 0x20);  // Accusé de réception de l'interruption
+
     ticks++;
     cpt_ticks++;
     
-    if (cpt_ticks == 50) {
+   if (cpt_ticks == 50) {
         cpt_ticks = 0;
         secondes++;
 
@@ -52,13 +53,14 @@ void tic_PIT(void) {
             minutes = 0;
             heures++;
         }
-    }
-    char timeString[LARGEUR];
-    sprintf(timeString, "%02ld:%02ld:%02ld", heures, minutes, secondes);
-    ecrit_temps(timeString, 8);
 
-    verifie_reveille(ticks);
-    ordonnanceur();
+        verifie_reveille(ticks);
+        ordonnanceur();
+
+        char timeString[LARGEUR];
+        sprintf(timeString, "%02ld:%02ld:%02ld", heures, minutes, secondes);
+        ecrit_temps(timeString, 8);
+    }
 }
 
 //Retourne le nombre d'interruptions d'horloge depuis le démarrage du noyau.
@@ -72,8 +74,6 @@ void clock_settings(unsigned long *quartz, unsigned long *ticks){
     *quartz = QUARTZ;
     *ticks = SCHEDFREQ;
 }
-
-void traitant_IT_32();
 
 // Ajoute le traitant et l'ajoute au numéro spécifique dans
 // la table des vecteurs d'interrutpion
@@ -129,4 +129,10 @@ void affiche_date(){
     sprintf(dateString,"%02d/%02d/%2d", j,mo,a);
     ecrit_date(dateString);
 
+}
+
+void init_horloge(void) {
+    reg_frequence(); // Configure la fréquence d'appel de TIC PIT
+    init_traitant_IT(32, traitant_IT_32); // Installe le gestionnaire d'interruptions pour l'horloge
+    sign_clock(); // Démasque l'IRQ 0 (horloge)
 }
