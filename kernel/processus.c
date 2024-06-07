@@ -11,6 +11,7 @@
 #include "horloge.h"
 #include "console.h"
 #include "stdbool.h"
+#include "files.h" // Pour les files (chprio)
 
 PidLibre * PidLibreTete;
 Processus * tableDesProcs[MAX_PROCESS];
@@ -172,7 +173,17 @@ int chprio(int pid, int newPrio) {
         if (ProcElu->prio < newPrio){
             ordonnanceur();
         }
-    }  
+    }  else if (proc->etat == ATTEND_FILE){
+        int fid = proc->fid;
+        assert(isFidValideAndExist(fid));
+        File * file = tableauFile[fid];
+        /*
+         Un processus bloqué sur file vide et dont la priorité est changée par chprio, 
+        est considéré comme le dernier processus (le plus jeune) de sa nouvelle priorité.
+        */
+        queue_del(proc, chainage);
+        queue_add(proc, &file->queueAttente, Processus, chainage, prio);
+    }
     // ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS
     return anciennePrio;
 }
@@ -225,6 +236,7 @@ void ordonnanceur(void){
                 queue_add(procEluActuel, &proc_mourants, Processus, chainage, prio);
                 break;
             case ZOMBIE: // On ne doit pas rajouter dans la liste si Zombie ou Attend
+            case ATTEND_FILE:
             case ATTEND_FILS:
                 break;
             default: // Est activable sinon !

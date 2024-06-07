@@ -11,7 +11,7 @@
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
 
-enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS };
+enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE };
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 typedef struct _PidLibre {
@@ -40,7 +40,10 @@ typedef struct _Processus {
     int retval;
     struct _Processus * pere;
 
-    int fileValue; // Valeur de la file
+    // Files de messages
+    int fid;
+    int fileValue;
+    bool isOperationSuccess;
 } Processus;
 
 
