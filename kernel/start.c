@@ -63,8 +63,8 @@ void kernel_start(void)
   init_ordonnanceur(); // Init l'ordonnanceur
 
 
-  start(&proc_runner, SIZE_PILE_EXEC, 128, "proc_runner", NULL);
-
+  start(&proc_runner, 4000, 128, "proc_runner", NULL);
+  printf("C'est bon!");
   idle();
   
   return;

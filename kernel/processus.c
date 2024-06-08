@@ -69,20 +69,32 @@ void add_fils(Processus * pere, Processus * fils){
 // Crée un processus et l'ajoute à la queue des processus activables
 // pile du processus ssize octets utilisables sans compter l'espace nécessaire au stockage de l'adresse de retour
 int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg){
-    
-    int pid = new_pid();
-    if(pid <= -1){ return -1; }
-    if (ssize > MAX_SIZE_PILE){ return -1; }
 
-   
-    if (prio<=0 || prio > PRIO_MAX){ return -1; }
-    
-    if( ssize < 5 || ssize > MAX_SIZE_PILE){
+    int pid = new_pid();
+    if(pid <= -1){ return -1; } 
+
+    // Vérifie Prio
+    if (prio<=0 || prio > PRIO_MAX){ add_pid(pid); return -1;}
+
+    // Vérifie dépassement avant addition
+    unsigned long octets_reserver = 3 * sizeof(int32_t); // Nos 3 mots (arg, exit_routine, pt_func) + operation free_mourant_queue etc..
+    if (ssize > ULONG_MAX - octets_reserver){ add_pid(pid); return -1; }
+    unsigned long taillePileOctets = ssize + octets_reserver; // En octets
+
+    Processus * proc = mem_alloc(sizeof(Processus));
+    if (proc == NULL){
+        add_pid(pid);
         return -1;
     }
+
     
-    ssize += 5*8; 
-    Processus * proc = mem_alloc(sizeof(Processus));
+    int32_t * pile = (int32_t *) mem_alloc(taillePileOctets);
+    if (pile == NULL){
+        add_pid(pid);
+        mem_free(proc, sizeof(Processus));
+        return -1;
+    }
+
     // on gere les attribus
     strcpy(proc->nom, name);
     proc->pid = pid;
@@ -90,14 +102,18 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     proc->secReveille = 0;
     proc->prio = prio;
 
-    proc->pile[SIZE_PILE_EXEC - 1 ] = (int32_t)arg;  // gestion des arguments
-    proc->pile[SIZE_PILE_EXEC - 2] = (int32_t)exit_routine; // Ret adresse
-    proc->pile[SIZE_PILE_EXEC - 3] = (int32_t)pt_func;
+    proc->pile = pile;
+
+    int32_t nbMot = taillePileOctets / sizeof(int32_t); // On assume que la taille de la pile est un multiple de 4
+    proc->pileSize = taillePileOctets;
+    proc->pile[nbMot-1] = (int32_t)arg;  // gestion des arguments
+    proc->pile[nbMot - 2] = (int32_t)exit_routine; // Ret adresse
+    proc->pile[nbMot - 3] = (int32_t)pt_func;
 
     // on gere les adresses de retour
     //proc->contexte[0] = 0;
-    proc->contexte[1] = (int32_t)&proc->pile[SIZE_PILE_EXEC-3];
-    //proc->contexte[2] = 0;//(int32_t)&proc->pile[SIZE_PILE_EXEC-3];
+    proc->contexte[1] = (int32_t)&proc->pile[nbMot-3];
+    //proc->contexte[2] = (int32_t)&proc->pile[nbMot-3];
     //proc->contexte[3] = 0;
     //proc->contexte[4] = 0;
 
@@ -151,7 +167,7 @@ int chprio(int pid, int newPrio) {
     }
 
     Processus * proc = tableDesProcs[pid];
-    if (proc == NULL || proc->etat == ZOMBIE){
+    if (proc == NULL || proc->etat == ZOMBIE){ // Pas de kill de zombie
         return -1;
     }
 
@@ -209,12 +225,13 @@ void free_childs(Processus * proc){
 void free_mourant_queue(){
     Processus * procMort;
     while ((procMort = queue_out(&proc_mourants, Processus, chainage)) != NULL){
-        // printf("Je suis mort %s\n", procMort->nom);
+        //printf("Je suis mort %s\n", procMort->nom);
 
         free_childs(procMort); // On libère les fils
 
         tableDesProcs[procMort->pid] = NULL;
         add_pid(procMort->pid); // On libère le pid
+        mem_free(procMort->pile, procMort->pileSize ); // On libère la pile
         mem_free(procMort, sizeof(Processus));
     }
 }
@@ -222,7 +239,8 @@ void free_mourant_queue(){
 
 /***********END TEST FNC*********/
 void ordonnanceur(void){
-    free_mourant_queue(); // On libère les processus mourant
+    free_mourant_queue();
+    //free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
      
     if (!queue_empty(&proc_activables)) {
@@ -244,14 +262,14 @@ void ordonnanceur(void){
                 break;
         }
 
-        Processus *procEluSuiv = queue_out(&proc_activables, Processus, chainage);
+       Processus *procEluSuiv = queue_out(&proc_activables, Processus, chainage);
         procEluSuiv->etat = ELU;
         ProcElu = procEluSuiv; 
+
         printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
 
-        ctx_sw(procEluActuel->contexte,ProcElu->contexte);
 
-            //ctx_ld(ProcElu->contexte);
+        ctx_sw(procEluActuel->contexte,ProcElu->contexte);
     }
 }
 
@@ -314,7 +332,7 @@ void verifie_reveille(unsigned long ticks) {
         next = queue_entry(current->chainage.prev, Processus, chainage);
         if (current->secReveille <= ticks){
             // On le réveille !
-            current->etat = ACTIVABLE;
+            current->etat = ACTIVABLE; 
             queue_del(current, chainage);
             queue_add(current, &proc_activables, Processus, chainage, prio);
         } else {
@@ -336,7 +354,6 @@ void exit(int retval){
 
         if (procMort->pere->etat == ATTEND_FILS){
             // retourner la retval au pere
-            // printf("Enfant fin! Réveil du père pid:%d\n", procMort->pere->pid);
             procMort->pere->etat = ACTIVABLE;
             queue_add(procMort->pere, &proc_activables, Processus, chainage, prio);
         }
@@ -358,7 +375,7 @@ int kill(int pid) {
     }
 
     Processus * proc = tableDesProcs[pid];
-    if (proc->etat == ZOMBIE){
+    if (proc->etat == ZOMBIE){ // Pas de kill de zombie
         return -1;
     }
 
