@@ -58,7 +58,7 @@ int retire_msg(File * f){
     f->nbMsg--;
     return message;
 }
-
+// Ajoute un processus à la file d'attente
 void add_proc(File * f, Processus * proc){
     queue_add(proc, &f->queueAttente, Processus, chainage, prio);
     proc->fid = f->fid;
@@ -101,7 +101,7 @@ int pcount(int fid, int *count){
 int pcreate(int maxMsg){
     int fid = new_fid();
     if (!isFidValide(fid)){ return -1;}
-    
+    printf("Créer file %d avec MAXMSG:%d\n", fid, maxMsg);
     File * f = mem_alloc(sizeof(File));
     f->fid = fid;
     f->maxMsg = maxMsg;
@@ -205,6 +205,7 @@ preset ou pdelete. Dans ce cas, la valeur de retour de psend est strictement né
 */
 // La primitive psend envoie le message dans la file identifiée par fid
 int psend(int fid, int message){
+    printf("psend %d MSG:%d\n", fid, message);
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
 
@@ -222,6 +223,7 @@ int psend(int fid, int message){
         proc->fid = -1;
         proc->fileValue = message;
         proc->isOperationSuccess = true;
+        f->nbProc--; // 1 processus en moins dans la file d'attente
 
         proc->etat = ACTIVABLE;
         queue_add(proc, &proc_activables, Processus, chainage, prio);
@@ -245,7 +247,10 @@ int psend(int fid, int message){
     } else {
         /*--Sinon, la file n'est pas pleine et aucun processus n'est bloqué en attente 
         de message. Le message est alors déposé directement dans la file.*/
+        int count;
         add_msg(f, message);
+        pcount(fid, &count);
+        printf("Ok Ajoute le msg ! count: %d\n",count);
     }
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
         ordonnanceur();
@@ -277,10 +282,9 @@ est considéré comme le dernier processus (le plus jeune) de sa nouvelle priori
 */
 
 int preceive(int fid,int *message){
-    /*
-        Si la valeur de fid est invalide, la valeur de retour de preceive est strictement négative, 
-        sinon elle est nulle. 
-    */
+    printf("Recevoir file %d\n", fid);
+    /*Si la valeur de fid est invalide, la valeur de retour de preceive est strictement négative, 
+        sinon elle est nulle. */
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
 
