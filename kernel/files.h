@@ -5,6 +5,7 @@
 #include "stdbool.h"
 
 #define NBQUEUE 10
+#define MAXMSG 10000
 
 typedef struct _FidLibre {
     int fid;
