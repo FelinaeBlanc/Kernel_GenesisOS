@@ -47,6 +47,6 @@ extern int cons_read(char *string, unsigned long length);
 
 extern void traite_car(char c, uint8_t ct );
 
-void defilement(void);
+extern void defilement(void);
 
 #endif
