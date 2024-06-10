@@ -18,8 +18,8 @@ int idle() {
 }
 
 int proc_runner(){
-  printf("proc runner !\n");
-  test_run(11);
+  // printf("proc runner !\n");
+  test_run(2);
   printf("Proc runner fini!!!!!!!!!!!!!!!!!!!!!\n");
   return 0;
 }
@@ -32,7 +32,7 @@ void kernel_start(void)
 
 
   start(&proc_runner, 4000, 128, "proc_runner", NULL);
-  printf("C'est bon!");
+  // printf("C'est bon!");
   idle();
   
   return;

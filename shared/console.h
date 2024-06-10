@@ -34,4 +34,10 @@
 
 extern void console_putbytes(const char *s, int len);
 
+/* Si on est nul, désactive l'écho sur la console, sinon le réactive. */
+extern void cons_echo(int on);
+
+/* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
+void cons_write(const char *str, long size);
+
 #endif
