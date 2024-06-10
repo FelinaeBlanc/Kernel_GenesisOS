@@ -77,7 +77,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     if (prio<=0 || prio > PRIO_MAX){ add_pid(pid); return -1;}
 
     // Vérifie dépassement avant addition
-    unsigned long octets_reserver = 3 * sizeof(int32_t); // Nos 3 mots (arg, exit_routine, pt_func) + operation free_mourant_queue etc..
+    unsigned long octets_reserver = STACK_SIZE * sizeof(int32_t); // Nos 3 mots (arg, exit_routine, pt_func) + operation free_mourant_queue etc..
     if (ssize > ULONG_MAX - octets_reserver){ add_pid(pid); return -1; }
     unsigned long taillePileOctets = ssize + octets_reserver; // En octets
 
@@ -106,17 +106,21 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
 
     int32_t nbMot = taillePileOctets / sizeof(int32_t); // On assume que la taille de la pile est un multiple de 4
     proc->pileSize = taillePileOctets;
-    proc->pile[nbMot-1] = (int32_t)arg;  // gestion des arguments
-    proc->pile[nbMot - 2] = (int32_t)exit_routine; // Ret adresse
-    proc->pile[nbMot - 3] = (int32_t)pt_func;
 
-    // on gere les adresses de retour
-    //proc->contexte[0] = 0;
-    proc->contexte[1] = (int32_t)&proc->pile[nbMot-3];
-    //proc->contexte[2] = (int32_t)&proc->pile[nbMot-3];
-    //proc->contexte[3] = 0;
-    //proc->contexte[4] = 0;
+    // Ajoute les canaries au début et fin de la pile
+    proc->pile[0] = CANARY_VALUE_A;
+    proc->pile[1] = CANARY_VALUE_B;
+    proc->pile[2] = CANARY_VALUE_C;
 
+    proc->pile[nbMot - 1] = CANARY_VALUE_A;
+    proc->pile[nbMot - 2] = CANARY_VALUE_B;
+    proc->pile[nbMot - 3] = CANARY_VALUE_C;
+
+    proc->pile[nbMot-4] = (int32_t)arg;  // gestion des arguments
+    proc->pile[nbMot - 5] = (int32_t)exit_routine; // Ret adresse
+    proc->pile[nbMot - 6] = (int32_t)pt_func;
+    
+    proc->contexte[1] = (int32_t)&proc->pile[nbMot-6];
     // on ajoute le processus à la table des processus
     tableDesProcs[pid] = proc;
 
@@ -236,15 +240,26 @@ void free_mourant_queue(){
     }
 }
 
+bool checkCanary(Processus * proc){
+    if (proc == NULL){ return false; }
+
+    int32_t nbMot = proc->pileSize / sizeof(int32_t);
+    return (proc->pile[0] == CANARY_VALUE_A && proc->pile[1] == CANARY_VALUE_B && proc->pile[2] == CANARY_VALUE_C) 
+    && (proc->pile[nbMot - 1] == CANARY_VALUE_A && proc->pile[nbMot - 2] == CANARY_VALUE_B && proc->pile[nbMot - 3] == CANARY_VALUE_C);
+}
 
 /***********END TEST FNC*********/
 void ordonnanceur(void){
     free_mourant_queue();
     //free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
-     
     if (!queue_empty(&proc_activables)) {
-        
+
+        if (procEluActuel != ProcIdle && !checkCanary(procEluActuel)){
+            printf("Canary corrompu ! EXIT /!\\\n");
+            *(char *)0 = 0;
+        }
+
         switch (procEluActuel->etat) {
             case ENDORMI:
                 queue_add(procEluActuel, &proc_endormis, Processus, chainage, secReveille);
@@ -262,7 +277,7 @@ void ordonnanceur(void){
                 break;
         }
 
-       Processus *procEluSuiv = queue_out(&proc_activables, Processus, chainage);
+        Processus *procEluSuiv = queue_out(&proc_activables, Processus, chainage);
         procEluSuiv->etat = ELU;
         ProcElu = procEluSuiv; 
 

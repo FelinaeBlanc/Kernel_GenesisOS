@@ -72,7 +72,7 @@ unsigned long current_clock(){
 //le nombre d'oscillations du quartz entre chaque interruption.
 void clock_settings(unsigned long *quartz, unsigned long *ticks){
     *quartz = QUARTZ;
-    *ticks = SCHEDFREQ;
+    *ticks = QUARTZ/SCHEDFREQ;
 }
 
 // Ajoute le traitant et l'ajoute au numéro spécifique dans

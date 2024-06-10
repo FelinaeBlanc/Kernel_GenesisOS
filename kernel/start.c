@@ -19,7 +19,7 @@ int idle() {
 
 int proc_runner(){
   printf("proc runner !\n");
-  test_run(4);
+  test_run(6);
   printf("Proc runner fini!!!!!!!!!!!!!!!!!!!!!\n");
   return 0;
 }
