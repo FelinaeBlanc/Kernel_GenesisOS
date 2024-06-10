@@ -5,8 +5,10 @@
 #include "string.h"
 #include "console.h"
 #include "segment.h"
+#include "stdbool.h"
 
 uint16_t ligne, colonne;
+bool echo = true; 
 
 // revoie l'adresse mémoir de lig col
 uint16_t *ptr_mem(uint32_t lig, uint32_t col)
@@ -51,6 +53,8 @@ void place_curseur(uint32_t lig, uint32_t col)
 
 void traite_car(char c){
     uint32_t lig, col;
+
+    if(!echo) return;
 
     switch (c)
     {
@@ -131,6 +135,35 @@ void console_putbytes(const char *s, int len){
         }
     }
    
+}
+
+/* Si on est nul, désactive l'écho sur la console, sinon le réactive.*/
+void cons_echo(int on){
+    if(on == 0){
+        echo = false;
+    }
+    else {
+        echo = true;
+    }
+}
+
+/* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
+void cons_write(const char *str, long size){
+    int i=0;
+    int j=0;
+
+    while(i*HAUTEUR + j < size){
+        traite_car(str[i*HAUTEUR + j]);
+        j++;
+        if (j>=HAUTEUR){
+            j = j%HAUTEUR;
+            i++;
+        }
+        if(ligne == HAUTEUR-1){
+            defilement();
+            ligne --;
+        }
+    }
 }
 
 
