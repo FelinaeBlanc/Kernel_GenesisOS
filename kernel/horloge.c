@@ -40,7 +40,7 @@ void tic_PIT(void) {
     ticks++;
     cpt_ticks++;
     
-   if (cpt_ticks == 50) {
+    if (cpt_ticks == CLOCKFREQ) { // Seconde
         cpt_ticks = 0;
         secondes++;
 
@@ -54,12 +54,16 @@ void tic_PIT(void) {
             heures++;
         }
 
-        verifie_reveille(ticks);
-        ordonnanceur();
-
         char timeString[LARGEUR];
         sprintf(timeString, "%02ld:%02ld:%02ld", heures, minutes, secondes);
         ecrit_temps(timeString, 8);
+    }
+
+    // Ordonnancement !
+    verifie_reveille(ticks); // Reveille les procs
+
+    if (cpt_ticks % SCHEDFREQ == 0) {
+        ordonnanceur();
     }
 }
 
@@ -72,7 +76,7 @@ unsigned long current_clock(){
 //le nombre d'oscillations du quartz entre chaque interruption.
 void clock_settings(unsigned long *quartz, unsigned long *ticks){
     *quartz = QUARTZ;
-    *ticks = QUARTZ/SCHEDFREQ;
+    *ticks = QUARTZ/ CLOCKFREQ;
 }
 
 // Ajoute le traitant et l'ajoute au numéro spécifique dans
@@ -88,7 +92,7 @@ void init_traitant_IT(uint32_t num_IT, void (*traitant)(void)){
 // Règle la fréquence des signaux
 void reg_frequence(void)
 {
-    uint16_t frequence = QUARTZ / SCHEDFREQ;
+    uint16_t frequence = QUARTZ / CLOCKFREQ;
 
     outb(0x34,0x43);
     outb((uint8_t)(frequence & 0xFF), 0x40);

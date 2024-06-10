@@ -281,7 +281,7 @@ void ordonnanceur(void){
         procEluSuiv->etat = ELU;
         ProcElu = procEluSuiv; 
 
-        printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
+        // printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
 
 
         ctx_sw(procEluActuel->contexte,ProcElu->contexte);
@@ -341,6 +341,9 @@ void verifie_reveille(unsigned long ticks) {
     Processus *current;
     Processus *next;
 
+    bool callOrdonnanceur = false;
+    int procEluPrio = ProcElu->prio;
+
     // Itérer en sens inverse sur la liste des endormis
     queue_for_each(current, &proc_endormis, Processus, chainage) {
         // Sauvegarder le pointeur vers l'élément suivant car 'current' peut être modifié dans le corps de la boucle
@@ -350,10 +353,18 @@ void verifie_reveille(unsigned long ticks) {
             current->etat = ACTIVABLE; 
             queue_del(current, chainage);
             queue_add(current, &proc_activables, Processus, chainage, prio);
+
+            if (current->prio > procEluPrio){ // Vérifie si on doit appeler l'ordonnanceur
+                callOrdonnanceur = true;
+            }
         } else {
             break;
         }
         current = next;
+    }
+
+    if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
+        ordonnanceur();
     }
 }
 
