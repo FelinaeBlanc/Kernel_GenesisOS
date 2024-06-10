@@ -39,9 +39,7 @@ void init_files(){
 }
 
 void add_msg(File * f, int message){
-    if (f->nbMsg >= f->maxMsg){
-        printf("bruh");
-    }
+    assert(f->nbMsg < f->maxMsg);
 
     Message * new_msg = mem_alloc(sizeof(Message));
     new_msg->message = message;
@@ -60,7 +58,7 @@ int retire_msg(File * f){
 }
 
 Processus * retire_proc(File * f){
-    if (f->nbProc == 0){ return NULL; }
+    assert(f->nbProc > 0);
     Processus * proc = queue_out(&f->queueAttente, Processus, chainage);
     f->nbProc--;
 
@@ -91,8 +89,7 @@ retour négatif, sinon 0.*/
 int pcount(int fid, int *count){
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
-    printf(" ==pcount ? %d\n",f->nbMsg);
-    printf(" Null? %d\n",count == NULL);
+    
     if (count != NULL){
         if (f->nbMsg == 0){
             *count = -f->nbProc;
@@ -114,7 +111,7 @@ int pcreate(int maxMsg){
 
     int fid = new_fid();
     if (!isFidValide(fid)){ return -1;}
-    printf("Créer file %d avec MAXMSG:%d\n", fid, maxMsg);
+
     File * f = mem_alloc(sizeof(File));
     f->fid = fid;
     f->maxMsg = maxMsg;
@@ -132,13 +129,15 @@ int pcreate(int maxMsg){
 int pdelete(int fid){
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
+    f->nbMsg = 0;
+    f->nbProc = 0;
 
     bool callOrdonnanceur = false;
     int procEluPrio = ProcElu->prio;
     
     // Remet les processus en attente dans l'état activable
     Processus * proc;
-    while ((proc = retire_proc(f)) != NULL){
+    while ((proc = queue_out(&f->queueAttente, Processus, chainage)) != NULL){
         proc->etat = ACTIVABLE;
         proc->fid = -1;
         proc->isOperationSuccess = false; // N'a pas réussis l'opération
@@ -179,13 +178,15 @@ négative sinon elle est nulle.
 int preset(int fid){
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
+    f->nbMsg = 0;
+    f->nbProc = 0;
 
     bool callOrdonnanceur = false;
     int procEluPrio = ProcElu->prio;
     
     // Remet les processus en attente dans l'état activable
     Processus * proc;
-    while ((proc = retire_proc(f)) != NULL){
+    while ((proc = queue_out(&f->queueAttente, Processus, chainage)) != NULL){
         proc->etat = ACTIVABLE;
         proc->fid = -1;
         proc->isOperationSuccess = false; // N'a pas réussis l'opération
@@ -218,7 +219,6 @@ preset ou pdelete. Dans ce cas, la valeur de retour de psend est strictement né
 */
 // La primitive psend envoie le message dans la file identifiée par fid
 int psend(int fid, int message){
-    printf(" !!!!psend %d MSG:%d\n", fid, message);
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
 
@@ -232,7 +232,6 @@ int psend(int fid, int message){
     alors le processus le plus ancien dans la file parmi les plus prioritaires est 
     débloqué et reçoit ce message.*/
     if (f->nbMsg == 0 && !queue_empty(&f->queueAttente)){
-        printf("Proc en attente!\n");
         Processus * proc = retire_proc(f);
         proc->fid = -1;
         proc->fileValue = message;
@@ -245,7 +244,6 @@ int psend(int fid, int message){
             callOrdonnanceur = true;
         }
     } else if (f->maxMsg == f->nbMsg){ // file pleine
-        printf("File pleine!\n");
     /*--Si la file est pleine, le processus appelant passe dans l'état bloqué sur 
     file pleine jusqu'à ce qu'une place soit disponible dans la file pour y mettre 
     le message.*/
@@ -256,16 +254,10 @@ int psend(int fid, int message){
         if (!ProcElu->isOperationSuccess){ // L'opération a échouer (pdelete ou preset a été appelé)
             return -1;
         }
-
-        //add_msg(f, message);
     } else {
-        printf("Add... !\n");
         /*--Sinon, la file n'est pas pleine et aucun processus n'est bloqué en attente 
         de message. Le message est alors déposé directement dans la file.*/
-        int count;
         add_msg(f, message);
-        pcount(fid, &count);
-        printf("Ok Ajoute le msg ! count: %d\n",count);
     }
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
         ordonnanceur();
@@ -297,7 +289,6 @@ est considéré comme le dernier processus (le plus jeune) de sa nouvelle priori
 */
 
 int preceive(int fid,int *message){
-    printf(" PPPPPP Recevoir file %d\n", fid);
     /*Si la valeur de fid est invalide, la valeur de retour de preceive est strictement négative, 
         sinon elle est nulle. */
     if (!isFidValideAndExist(fid)){ return -1; }
@@ -336,10 +327,10 @@ int preceive(int fid,int *message){
         La primitive preceive lit et enlève le premier (plus ancien) message de la file fid. 
         Le message lu est placé dans *message si message n'est pas nul, sinon il est oublié.
         */
+
+        int val = retire_msg(f);
         if (message != NULL){
-            *message = retire_msg(f);
-        } else {
-            retire_msg(f);
+            *message = val;
         }
 
         if (!queue_empty(&f->queueAttente)){

@@ -407,10 +407,8 @@ int kill(int pid) {
 
     // Gestion de l'elu avec une comparaison de pointeur (on sais jamais)
     if(proc == ProcElu){
-        proc->etat = MOURANT;
         if (proc->pere != NULL){
             proc->etat = ZOMBIE;
-            
         } else {
             proc->etat = MOURANT;
         }
