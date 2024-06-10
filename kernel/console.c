@@ -51,7 +51,7 @@ void place_curseur(uint32_t lig, uint32_t col)
     colonne = col;
 }
 
-void traite_car(char c){
+void traite_car(char c, uint8_t ct ){
     uint32_t lig, col;
 
     if(!echo) return;
@@ -88,7 +88,7 @@ void traite_car(char c){
     
     default:
         if (c <= 126 && c >= 32){
-            ecrit_car(ligne, colonne, BLANC, NOIR, FALSE, c);
+            ecrit_car(ligne, colonne, ct, NOIR, FALSE, c);
             col = colonne +1;
             lig = ligne;
 
@@ -123,7 +123,7 @@ void console_putbytes(const char *s, int len){
     int j=0;
 
     while(i*HAUTEUR + j < len){
-        traite_car(s[i*HAUTEUR + j]);
+        traite_car(s[i*HAUTEUR + j], BLANC);
         j++;
         if (j>=HAUTEUR){
             j = j%HAUTEUR;
@@ -153,7 +153,7 @@ void cons_write(const char *str, long size){
     int j=0;
 
     while(i*HAUTEUR + j < size){
-        traite_car(str[i*HAUTEUR + j]);
+        traite_car(str[i*HAUTEUR + j], BLANC);
         j++;
         if (j>=HAUTEUR){
             j = j%HAUTEUR;

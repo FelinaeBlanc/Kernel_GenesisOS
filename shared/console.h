@@ -32,12 +32,21 @@
 #define TRUE 0x01
 #define FALSE 0x00
 
+extern uint16_t ligne, colonne;
+
 extern void console_putbytes(const char *s, int len);
 
 /* Si on est nul, désactive l'écho sur la console, sinon le réactive. */
 extern void cons_echo(int on);
 
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
-void cons_write(const char *str, long size);
+extern void cons_write(const char *str, long size);
+
+/* Si length est nul, cette fonction retourne 0. Sinon, elle attend que l'utilisateur ait tapé une ligne complète */
+extern int cons_read(char *string, unsigned long length);
+
+extern void traite_car(char c, uint8_t ct );
+
+void defilement(void);
 
 #endif

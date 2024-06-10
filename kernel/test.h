@@ -6,7 +6,8 @@
 
 int test_run(int);
 
-int
-test_proc(void *arg);
+int test_proc(void *arg);
+
+void test_until(int n);
 
 #endif
