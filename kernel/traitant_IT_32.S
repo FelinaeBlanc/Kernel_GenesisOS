@@ -1,4 +1,3 @@
-#include "segment.h"
 # cette directive sert a rendre l’etiquette publique
     .text
     .globl traitant_IT_32

@@ -21,9 +21,6 @@ typedef struct _File {
     int fid;
     int maxMsg;
 
-    int nbMsg;
-    int nbProc;
-
     struct list_link queueAttente;
     struct list_link queueMsg;
 } File;

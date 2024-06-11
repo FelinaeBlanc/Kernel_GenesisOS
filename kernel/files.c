@@ -38,29 +38,48 @@ void init_files(){
     }
 }
 
+int getNbMsg(File * f){
+    int cpt = 0;
+    
+    Message *current;
+    queue_for_each(current, &f->queueMsg, Message, chainage) {
+        cpt++;
+    }
+    return cpt;
+}
+
+int getNbProcs(File * f){
+    int cpt = 0;
+
+    Processus *current;
+    queue_for_each(current, &f->queueAttente, Processus, chainage) {
+        cpt++;
+    }
+    return cpt;
+}
+
 void add_msg(File * f, int message){
-    assert(f->nbMsg < f->maxMsg);
+    assert(getNbMsg(f) < f->maxMsg);
 
     Message * new_msg = mem_alloc(sizeof(Message));
     new_msg->message = message;
-    new_msg->place = (f->maxMsg - f->nbMsg); // place dans la file (ordre decroissant)
+    new_msg->place = 0; // (FIFO)
     queue_add(new_msg, &f->queueMsg, Message, chainage, place);
-    f->nbMsg++;
+
 }
+
 int retire_msg(File * f){
-    assert(f->nbMsg > 0);
-    
+
     Message * msg = queue_out(&f->queueMsg, Message, chainage);
     int message = msg->message;
     mem_free(msg, sizeof(Message));
-    f->nbMsg--;
+
     return message;
 }
 
 Processus * retire_proc(File * f){
-    assert(f->nbProc > 0);
+    assert(getNbProcs(f) > 0);
     Processus * proc = queue_out(&f->queueAttente, Processus, chainage);
-    f->nbProc--;
 
     return proc;
 }
@@ -70,7 +89,6 @@ void add_proc(File * f, Processus * proc){
     queue_add(proc, &f->queueAttente, Processus, chainage, prio);
     proc->fid = f->fid;
     proc->etat = ATTEND_FILE;
-    f->nbProc++;
 }
 
 bool isFidValide(int fid){
@@ -79,6 +97,8 @@ bool isFidValide(int fid){
 bool isFidValideAndExist(int fid){
     return isFidValide(fid) && tableauFile[fid] != NULL;
 }
+
+
 /*
 -La primitive pcount lit la quantité de données et de processus en attente sur la file fid. 
 Si count n'est pas nul, elle y place une valeur négative égale à l'opposé du nombre 
@@ -91,10 +111,13 @@ int pcount(int fid, int *count){
     File * f = tableauFile[fid];
     
     if (count != NULL){
-        if (f->nbMsg == 0){
-            *count = -f->nbProc;
+        int nbMsg = getNbMsg(f);
+        int nbProc = getNbProcs(f);
+        
+        if (nbMsg == 0){
+            *count = -(nbProc);
         } else {
-            *count = f->nbMsg + f->nbProc;
+            *count = nbMsg + nbProc;
         }
     } else {
         return -1;
@@ -106,6 +129,7 @@ int pcount(int fid, int *count){
 
 // La primitive pcreate alloue une file de capacité égale à la valeur de count
 int pcreate(int maxMsg){
+
     //  si la valeur de count est négative ou nulle l
     if (maxMsg <= 0 || maxMsg > MAXMSG){ return -1; }
 
@@ -115,7 +139,6 @@ int pcreate(int maxMsg){
     File * f = mem_alloc(sizeof(File));
     f->fid = fid;
     f->maxMsg = maxMsg;
-    f->nbMsg = 0;
 
     INIT_LIST_HEAD(&f->queueAttente);
     INIT_LIST_HEAD(&f->queueMsg);
@@ -129,8 +152,6 @@ int pcreate(int maxMsg){
 int pdelete(int fid){
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
-    f->nbMsg = 0;
-    f->nbProc = 0;
 
     bool callOrdonnanceur = false;
     int procEluPrio = ProcElu->prio;
@@ -178,8 +199,6 @@ négative sinon elle est nulle.
 int preset(int fid){
     if (!isFidValideAndExist(fid)){ return -1; }
     File * f = tableauFile[fid];
-    f->nbMsg = 0;
-    f->nbProc = 0;
 
     bool callOrdonnanceur = false;
     int procEluPrio = ProcElu->prio;
@@ -231,7 +250,7 @@ int psend(int fid, int message){
     /*-Si la file est vide et que des processus sont bloqués en attente de message, 
     alors le processus le plus ancien dans la file parmi les plus prioritaires est 
     débloqué et reçoit ce message.*/
-    if (f->nbMsg == 0 && !queue_empty(&f->queueAttente)){
+    if (getNbMsg(f) == 0 && !queue_empty(&f->queueAttente)){
         Processus * proc = retire_proc(f);
         proc->fid = -1;
         proc->fileValue = message;
@@ -243,7 +262,7 @@ int psend(int fid, int message){
         if (proc->prio > procEluPrio){
             callOrdonnanceur = true;
         }
-    } else if (f->maxMsg == f->nbMsg){ // file pleine
+    } else if (f->maxMsg == getNbMsg(f)){ // file pleine
     /*--Si la file est pleine, le processus appelant passe dans l'état bloqué sur 
     file pleine jusqu'à ce qu'une place soit disponible dans la file pour y mettre 
     le message.*/
@@ -300,7 +319,7 @@ int preceive(int fid,int *message){
     ProcElu->fileValue = -1; // Sera set par la suite 
     ProcElu->isOperationSuccess = true; // pour savoir si il a été débloqué par un pdelete ou preset
 
-    if (f->nbMsg == 0){ // file vide
+    if (getNbMsg(f) == 0){ // file vide
     /*
     L'obtention du premier message de la file peut nécessiter le passage dans l'état 
     bloqué sur file vide jusqu'à ce qu'un autre processus exécute une primitive psend.

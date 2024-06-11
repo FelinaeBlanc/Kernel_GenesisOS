@@ -2,6 +2,7 @@
 #include "processus.h"
 #include "stddef.h"
 #include "mem.h"
+#include "user_stack_mem.h"
 #include "string.h"
 #include "stdlib.h"
 #include "stdio.h"
@@ -9,6 +10,8 @@
 #include "console.h"
 #include "stdbool.h"
 #include "files.h" // Pour les files (chprio)
+#include "traitant_IT_49.h"
+#include "segment.h"
 
 PidLibre * PidLibreTete;
 Processus * tableDesProcs[MAX_PROCESS];
@@ -77,52 +80,80 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     if (prio<=0 || prio > PRIO_MAX){ add_pid(pid); return -1;}
 
     // Vérifie dépassement avant addition
-    unsigned long octets_reserver = STACK_SIZE * sizeof(int32_t); // Nos 3 mots (arg, exit_routine, pt_func) + operation free_mourant_queue etc..
+    unsigned long octets_reserver = USER_STACK_SIZE * sizeof(int32_t); // Nos 3 mots (arg, exit_routine, pt_func) + operation free_mourant_queue etc..
     if (ssize > ULONG_MAX - octets_reserver){ add_pid(pid); return -1; }
-    unsigned long taillePileOctets = ssize + octets_reserver; // En octets
+
+    // taille des pile coté user/kernel
+    unsigned long User_taillePileOctets = ssize + octets_reserver; // En octets
+    unsigned long Kernel_taillePileOctets = KERNEL_STACK_SIZE * sizeof(int32_t);
+
 
     Processus * proc = mem_alloc(sizeof(Processus));
     if (proc == NULL){
         add_pid(pid);
         return -1;
     }
-
-    
-    int32_t * pile = (int32_t *) mem_alloc(taillePileOctets);
-    if (pile == NULL){
+    // Alloue pile user
+    int32_t * pileUser = (int32_t *) user_stack_alloc(User_taillePileOctets);
+    if (pileUser == NULL){
         add_pid(pid);
+        mem_free(proc, sizeof(Processus));
+        return -1;
+    }
+    // Alloue pile kernel
+    int32_t * pileKernel = (int32_t *) mem_alloc(Kernel_taillePileOctets);
+    if (pileKernel == NULL){
+        add_pid(pid);
+        user_stack_free(pileUser, User_taillePileOctets);
         mem_free(proc, sizeof(Processus));
         return -1;
     }
 
     // on gere les attribus
-    strcpy(proc->nom, name);
+    strcpy(proc->nom, name); // <-------- ATTENTION PROBLEME SECURITE TODO
     proc->pid = pid;
     proc->etat = ACTIVABLE;
     proc->secReveille = 0;
     proc->prio = prio;
 
-    proc->pile = pile;
+    proc->pileUser = pileUser;
+    proc->pileKernel = pileKernel;
 
-    int32_t nbMot = taillePileOctets / sizeof(int32_t); // On assume que la taille de la pile est un multiple de 4
-    proc->pileSize = taillePileOctets;
+    int32_t nbMotUser = User_taillePileOctets / sizeof(int32_t); // On assume que la taille de la pile est un multiple de 4
+    proc->pileSizeUser = User_taillePileOctets;
+    int32_t nbMotKernel = Kernel_taillePileOctets / sizeof(int32_t); // On assume que la taille de la pile est un multiple de 4
+    proc->pileSizeKernel = Kernel_taillePileOctets;
+
+    // gestion de la pile
+
+    // CS (code segment) désigne le segment contenant le programme en cours d'exécution ;
+    // DS (data segment) désigne le segment des données courantes ;
+    // SS (stack segment) désigne un segment de pile ;
+    // ES, FS et GS permettent d'adresser trois segments supplémentaires.
+
+    proc->pileUser[nbMotUser-1] = (int32_t)arg;  // gestion des arguments
+    proc->pileUser[nbMotUser - 2] = (int32_t)exit_routine; // Ret adresse
+    //proc->pileUser[nbMotUser - 3] = (int32_t)pt_func;
+
+    proc->pileKernel[nbMotKernel-1] = USER_DS; // SS
+    proc->pileKernel[nbMotKernel-2] = (int32_t)(&proc->pileUser[nbMotUser - 2]); // ESP User
+    proc->pileKernel[nbMotKernel-3] = USER_EFLAGS; // EFLAGS
+    proc->pileKernel[nbMotKernel-4] = USER_CS; // CS
+    proc->pileKernel[nbMotKernel-5] = (int32_t)pt_func; // EIP
+    proc->pileKernel[nbMotKernel-6] = (int32_t)iret_func; // iret!
 
     // Ajoute les canaries au début et fin de la pile
-    proc->pile[0] = CANARY_VALUE_A;
-    proc->pile[1] = CANARY_VALUE_B;
-    proc->pile[2] = CANARY_VALUE_C;
+    //proc->pileKernel[0] = CANARY_VALUE_A;
+    //proc->pileKernel[1] = CANARY_VALUE_B;
+    //proc->pileKernel[2] = CANARY_VALUE_C;
 
-    proc->pile[nbMot - 1] = CANARY_VALUE_A;
-    proc->pile[nbMot - 2] = CANARY_VALUE_B;
-    proc->pile[nbMot - 3] = CANARY_VALUE_C;
+    //proc->pileKernel[nbMot - 1] = CANARY_VALUE_A;
+    //proc->pileKernel[nbMot - 2] = CANARY_VALUE_B;
+    //proc->pileKernel[nbMot - 3] = CANARY_VALUE_C;
 
-    proc->pile[nbMot-4] = (int32_t)arg;  // gestion des arguments
-    proc->pile[nbMot - 5] = (int32_t)exit_routine; // Ret adresse
-    proc->pile[nbMot - 6] = (int32_t)pt_func;
-    
-    proc->contexte[1] = (int32_t)&proc->pile[nbMot-6];
-    // on ajoute le processus à la table des processus
-    tableDesProcs[pid] = proc;
+    // (ebx, esp, ebp, esi, edi)
+    proc->contexte[1] = (int32_t)&proc->pileKernel[nbMotKernel-6];
+    tableDesProcs[pid] = proc; // on ajoute le processus à la table des processus
 
     // gestion des filiation
     if (ProcElu != ProcIdle){
@@ -135,9 +166,9 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     queue_add(proc, &proc_activables, Processus, chainage, prio);
 
     // affiche_table_process();
-    ordonnanceur();
-    
-    
+    if (prio > ProcElu->prio){ // On switch si on a une meilleur prio !
+        ordonnanceur();
+    }
     return pid;
 }
 
@@ -145,6 +176,7 @@ int getpid(void){
     // return pid de pro elu
     return ProcElu != NULL ? ProcElu->pid :  -1;
 }
+
 char *mon_nom(void){
     // return nom du pro elu
     return ProcElu != NULL ? ProcElu->nom : "No Proc";
@@ -225,6 +257,7 @@ void free_childs(Processus * proc){
         fils = filsSuiv;
     }
 }
+
 // Libère les processus mourant
 void free_mourant_queue(){
     Processus * procMort;
@@ -235,18 +268,18 @@ void free_mourant_queue(){
 
         tableDesProcs[procMort->pid] = NULL;
         add_pid(procMort->pid); // On libère le pid
-        mem_free(procMort->pile, procMort->pileSize ); // On libère la pile
+        mem_free(procMort->pileKernel, procMort->pileSizeKernel ); // On libère la pile
         mem_free(procMort, sizeof(Processus));
     }
 }
 
-bool checkCanary(Processus * proc){
-    if (proc == NULL){ return false; }
+// bool checkCanary(Processus * proc){
+//     if (proc == NULL){ return false; }
 
-    int32_t nbMot = proc->pileSize / sizeof(int32_t);
-    return (proc->pile[0] == CANARY_VALUE_A && proc->pile[1] == CANARY_VALUE_B && proc->pile[2] == CANARY_VALUE_C) 
-    && (proc->pile[nbMot - 1] == CANARY_VALUE_A && proc->pile[nbMot - 2] == CANARY_VALUE_B && proc->pile[nbMot - 3] == CANARY_VALUE_C);
-}
+//     int32_t nbMot = proc->pileSize / sizeof(int32_t);
+//     return (proc->pileKernel[0] == CANARY_VALUE_A && proc->pileKernel[1] == CANARY_VALUE_B && proc->pileKernel[2] == CANARY_VALUE_C) 
+//     && (proc->pileKernel[nbMot - 1] == CANARY_VALUE_A && proc->pileKernel[nbMot - 2] == CANARY_VALUE_B && proc->pileKernel[nbMot - 3] == CANARY_VALUE_C);
+// }
 
 /***********END TEST FNC*********/
 void ordonnanceur(void){
@@ -255,10 +288,10 @@ void ordonnanceur(void){
     Processus * procEluActuel = ProcElu;
     if (!queue_empty(&proc_activables)) {
 
-        if (procEluActuel != ProcIdle && !checkCanary(procEluActuel)){
+        /*if (procEluActuel != ProcIdle && !checkCanary(procEluActuel)){
             printf("Canary corrompu ! EXIT /!\\\n");
             *(char *)0 = 0;
-        }
+        }*/
 
         switch (procEluActuel->etat) {
             case ENDORMI:
@@ -322,8 +355,13 @@ void init_ordonnanceur(){
 
     init_files(); // Init les files !
     init_horloge(); // Init l'horloge après...
-    //affiche_table_process();
+    init_traitant_IT(49, traitant_IT_49);
+
+    //int fnc = 0x100000;
+    int (*user_start)(void*) = (int (*)(void*))0x1000000; // 16M
+    start(user_start, 0, 1, "USER", NULL);
 }
+
 
 /*******Endormi******/
 void wait_clock(unsigned long ticks){
@@ -401,7 +439,7 @@ int kill(int pid) {
     }
 
     Processus * proc = tableDesProcs[pid];
-    if (proc->etat == ZOMBIE){ // Pas de kill de zombie
+    if (proc->etat == ZOMBIE || proc->etat == MOURANT){ // Pas de kill de zombie
         return -1;
     }
 
@@ -414,8 +452,9 @@ int kill(int pid) {
         }
         ordonnanceur();
     }
-    else if (proc->etat == ACTIVABLE || proc->etat == ENDORMI || proc->etat == ATTEND_FILS) {
+    else {
         // si il est dans la liste des activable on le tue
+
         queue_del(proc, chainage);
         if (proc->pere != NULL){
             proc->etat = ZOMBIE;
@@ -428,6 +467,7 @@ int kill(int pid) {
             proc->etat = MOURANT;
             queue_add(proc, &proc_mourants, Processus, chainage, prio);
         }
+        free_mourant_queue();
     }
 
     return 0;
@@ -497,10 +537,12 @@ int waitpid(int pid, int *retvalp){
     proc->etat = MOURANT;
     proc->pere = NULL;
     queue_add(proc, &proc_mourants, Processus, chainage, prio);
-
+    free_mourant_queue();
+    
     // On retourne les valeur du processus enfant trouvé !
     if (retvalp != NULL){
         *retvalp = retval;
     }
     return procPid;
 }
+

@@ -14,6 +14,7 @@
 #define KERNEL_DS	0x18	/* Kernel's PL0 data segment */
 #define USER_CS		0x43	/* User's code descriptor, RPL=3 */
 #define USER_DS		0x4b	/* User's data descriptor, RPL=3 */
+#define USER_EFLAGS 0x202    /* User's eflags */
 #define TRAP_TSS_BASE	0x50
 
 #endif

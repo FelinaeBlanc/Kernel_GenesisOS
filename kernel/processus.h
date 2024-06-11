@@ -9,13 +9,14 @@
 #define MAX_PROCESS 50
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
-#define STACK_SIZE 512
+#define KERNEL_STACK_SIZE 512
+#define USER_STACK_SIZE 512
 
-#define CANARY_VALUE_A (int32_t)0xDEADBEEF
-#define CANARY_VALUE_B (int32_t)0xCAFEBABE
-#define CANARY_VALUE_C (int32_t)0xBEEFCAFE
+// #define CANARY_VALUE_A (int32_t)0xDEADBEEF
+// #define CANARY_VALUE_B (int32_t)0xCAFEBABE
+// #define CANARY_VALUE_C (int32_t)0xBEEFCAFE
 
-enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE };
+enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE }; // + ATTEND_ES ??
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 typedef struct _PidLibre {
@@ -28,7 +29,7 @@ extern PidLibre * PidLibreTete;
 
 typedef struct _Processus {
     int pid;
-    char nom[25];
+    char nom[50];
     enum Etat etat;
     int prio;
 
@@ -36,8 +37,10 @@ typedef struct _Processus {
     
     // Pile
     int32_t contexte[5];  // Array to hold the saved registers (ebx, esp, ebp, esi, edi)
-    int32_t * pile;  // Stack for the process
-    unsigned long pileSize; // en octets
+    int32_t * pileUser;  // Stack for the process
+    int32_t * pileKernel;  // Stack for the process
+    unsigned long pileSizeUser; // en octets
+    unsigned long pileSizeKernel; // en octets
 
     // chainage + filiation
     link chainage; // chainage pour les liaisons avec ordre de priorité
@@ -67,19 +70,20 @@ extern Processus * tableDesProcs[MAX_PROCESS];
 
 /* Fonction control switch */
 extern void ctx_sw(int *, int *);
-extern void ctx_ld(int *);
+extern void iret_func(void);
+
 /* Fonction de retour qui appel exit avec %eax en argument*/
 extern void exit_routine(void);
-
 extern void init_ordonnanceur(void);
 extern void ordonnanceur(void);
 extern void free_mourant_queue(void); // On libère les processus mourant
 
-int getpid(void);
-char *mon_nom(void);
+extern int getpid(void);
+extern char *mon_nom(void);
 
 // Fonctions de prio
 extern int getprio(int pid);
+
 extern int chprio(int pid, int newprio);
 
 extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
@@ -87,8 +91,6 @@ extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const cha
 /******Edormi******/
 
 extern void wait_clock(unsigned long ticks);
-
-extern void insert_endormi(Processus *proc);
 
 extern void verifie_reveille(unsigned long ticks);
 

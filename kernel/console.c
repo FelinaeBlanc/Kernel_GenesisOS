@@ -166,4 +166,3 @@ void cons_write(const char *str, long size){
     }
 }
 
-

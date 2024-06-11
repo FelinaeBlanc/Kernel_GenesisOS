@@ -43,7 +43,7 @@ extern void cons_echo(int on);
 extern void cons_write(const char *str, long size);
 
 /* Si length est nul, cette fonction retourne 0. Sinon, elle attend que l'utilisateur ait tapé une ligne complète */
-extern int cons_read(char *string, unsigned long length);
+// extern int cons_read(char *string, unsigned long length);
 
 extern void traite_car(char c, uint8_t ct );
 
