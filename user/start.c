@@ -22,10 +22,6 @@
 */
 void user_start(void) {
 
-    // en mode superviseur : CS = 0x10, autres registres de segments = 0x18
-    // en mode utilisateur : CS = 0x43, autres registres de segments = 0x4b
-    // printf("Ok\n");
-    getpid();
     while(1) {}
 
     return;

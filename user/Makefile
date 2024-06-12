@@ -1,7 +1,7 @@
 # Copyright (C) 2001-2003 by Simon Nieuviarts
 
 # Files to compile
-FILES=$(wildcard *.S *.c) printf.c sprintf.c doprnt.c panic.c string.c
+FILES=crt0.S builtin.S $(wildcard *.c) printf.c sprintf.c doprnt.c panic.c string.c
 DIRS=. ../shared
 
 # Directory and output object files
