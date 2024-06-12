@@ -92,4 +92,5 @@ void traitant_IT_49() {
     __asm__ __volatile__ ("movl %0, %%eax\n" : : "r"(retval));
 
     __asm__ __volatile__ ("iret;");
+    return ;
 }

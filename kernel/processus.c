@@ -132,7 +132,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     // ES, FS et GS permettent d'adresser trois segments supplémentaires.
 
     proc->pileUser[nbMotUser-1] = (int32_t)arg;  // gestion des arguments
-    proc->pileUser[nbMotUser - 2] = (int32_t)exit_routine; // Ret adresse
+    proc->pileUser[nbMotUser-2] = (int32_t)exit_routine; // Ret adresse
     //proc->pileUser[nbMotUser - 3] = (int32_t)pt_func;
 
     proc->pileKernel[nbMotKernel-1] = USER_DS; // SS
@@ -174,6 +174,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
 
 int getpid(void){
     // return pid de pro elu
+    printf("Pourquoi je passe pas la HELP!\n");
     return ProcElu != NULL ? ProcElu->pid :  -1;
 }
 

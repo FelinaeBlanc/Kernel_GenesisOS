@@ -1,5 +1,5 @@
 #!/bin/bash
-gdb kernel/kernel.bin -ex "target remote :1234" -ex "add-symbol-file ./user/user.debug 0x1000000"
+gdb --tui kernel/kernel.bin -ex "target remote :1234" -ex "add-symbol-file ./user/user.debug 0x1000000"
 
 #-ex "b waitpid" \
 #                      -ex "b test.c:1220" \

@@ -1,4 +1,4 @@
-/*#ifndef BUILTIN_H
+#ifndef BUILTIN_H
 #define BUILTIN_H
 
 extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
@@ -7,6 +7,7 @@ extern int kill(int pid);
 
 extern char *mon_nom(void);
 extern int getpid(void);
+
 extern int getprio(int pid);
 extern int chprio(int pid, int newprio);
 
@@ -27,6 +28,4 @@ extern void cons_echo(int);
 extern void cons_read(char *, int);
 extern void cons_write(char *, int);
 
-
 #endif
-*/

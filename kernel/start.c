@@ -29,8 +29,6 @@ void kernel_start(void)
   printf("\f");
 
   init_ordonnanceur(); // Init l'ordonnanceur
-
-
   start(&proc_runner, 4000, 128, "proc_runner", NULL);
   // printf("C'est bon!");
   idle();
