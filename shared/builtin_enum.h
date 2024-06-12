@@ -1,33 +1,26 @@
 #ifndef BUILTIN_ENUM_H
 #define BUILTIN_ENUM_H
 
-enum Builtin {
-    GETPID,
-    CONS_PUTBYTES,
-    START,
-    EXIT,
-    KILL,
-
-    MON_NOM,
-    GETPRIO,
-    CHPRIO,
-
-    PCOUNT,
-    PCREATE,
-    PDELETE,
-    PRECEIVE,
-    PRESET,
-    PSEND,
-
-    CLOCK_SETTINGS,
-    CURRENT_CLOCK,
-
-    WAIT_CLOCK,
-    WAITPID,
-
-    CONS_ECHO,
-    CONS_READ,
-    CONS_WRITE
-};
+#define GETPID 0
+#define CONS_PUTBYTES 1
+#define START 2
+#define EXIT 3
+#define KILL 4
+// #define MON_NOM 5
+#define GETPRIO 6
+#define CHPRIO 7
+#define PCOUNT 8
+#define PCREATE 9
+#define PDELETE 10
+#define PRECEIVE 11
+#define PRESET 12
+#define PSEND 13
+#define CLOCK_SETTINGS 14
+#define CURRENT_CLOCK 15
+#define WAIT_CLOCK 16
+#define WAITPID 17
+#define CONS_ECHO 18
+#define CONS_READ 19
+#define CONS_WRITE 20
 
 #endif

@@ -11,6 +11,8 @@
 #define PRIO_IDLE 0
 #define KERNEL_STACK_SIZE 512
 #define USER_STACK_SIZE 512
+#define EXIT_ROUTINE 0x1100000
+#define USER_START 0x1000000
 
 // #define CANARY_VALUE_A (int32_t)0xDEADBEEF
 // #define CANARY_VALUE_B (int32_t)0xCAFEBABE
@@ -29,7 +31,7 @@ extern PidLibre * PidLibreTete;
 
 typedef struct _Processus {
     int pid;
-    char nom[50];
+    char nom[20];
     enum Etat etat;
     int prio;
 

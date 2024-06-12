@@ -21,7 +21,7 @@
  */
 
 	.text
-	.global	entry
+	.global	entry, exit_routine
 entry:
 	/* Call the first user process */
 	jmp	user_start

@@ -47,6 +47,12 @@ SECTIONS {
 		*(COMMON)
 	}
 
+	/* New section pour fonction retour implicite */
+	. = 0x1100000;
+	.exit_routine : {
+		*(.exit_routine)
+	}
+
 	_end = .;
 
 	/DISCARD/ : {

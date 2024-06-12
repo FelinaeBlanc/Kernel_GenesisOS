@@ -5,7 +5,7 @@ extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const cha
 extern void exit(int retval);
 extern int kill(int pid);
 
-extern char *mon_nom(void);
+//extern char *mon_nom(void);
 extern int getpid(void);
 
 extern int getprio(int pid);

@@ -132,7 +132,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     // ES, FS et GS permettent d'adresser trois segments supplémentaires.
 
     proc->pileUser[nbMotUser-1] = (int32_t)arg;  // gestion des arguments
-    proc->pileUser[nbMotUser-2] = (int32_t)exit_routine; // Ret adresse
+    proc->pileUser[nbMotUser-2] = EXIT_ROUTINE; // Ret adresse
     //proc->pileUser[nbMotUser - 3] = (int32_t)pt_func;
 
     proc->pileKernel[nbMotKernel-1] = USER_DS; // SS
@@ -174,8 +174,6 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
 
 int getpid(void){
     // return pid de pro elu
-    printf("Pourquoi je passe pas la HELP!\n");
-    printf("Je devrais etre %d\n", ProcElu->pid);
     return ProcElu != NULL ? ProcElu->pid :  -1;
 }
 
@@ -200,7 +198,6 @@ int chprio(int pid, int newPrio) {
         return -1;
     }
     if (newPrio <= 0 || newPrio > PRIO_MAX){
-        //printf("valeur de priorité non conforme");
         return -1;
     }
 
@@ -359,8 +356,7 @@ void init_ordonnanceur(){
     init_horloge(); // Init l'horloge après...
     init_traitant_IT(49, traitant_IT_49, IT49);
 
-    //int fnc = 0x100000;
-    int (*user_start)(void*) = (int (*)(void*))0x1000000; // 16M
+    int (*user_start)(void*) = (int (*)(void*))USER_START; // 16M
     start(user_start, 0, 1, "USER", NULL);
 }
 

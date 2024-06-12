@@ -1,7 +1,7 @@
 # Copyright (C) 2001-2003 by Simon Nieuviarts
 
 # Files to compile
-FILES=crt0.S builtin.S $(wildcard *.c) printf.c sprintf.c doprnt.c panic.c string.c
+FILES=crt0.S builtin.S exit_routine.S $(wildcard *.c) printf.c sprintf.c doprnt.c panic.c string.c
 DIRS=. ../shared
 
 # Directory and output object files
@@ -20,7 +20,7 @@ DEF=
 
 INC=$(patsubst %,-I%,$(DIRS))
 CCL=$(CC) -Werror $(KFLAGS) $(DEF) $(INC)
-ASL=$(AS) -DASSEMBLER $(DEF) $(INC)
+ASL=$(AS) -g -DASSEMBLER $(DEF) $(INC)
 DEPS := $(patsubst %.o, %.d, $(OBJS))
 
 # Where to search for source files
