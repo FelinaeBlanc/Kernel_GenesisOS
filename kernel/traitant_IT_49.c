@@ -4,9 +4,9 @@
 #include "horloge.h"
 #include "console.h"
 
-void traitant_IT_49() {
+int traitant_IT_49_switch() {
     int eax_val, ebx_val, ecx_val, edx_val, esi_val, edi_val;
-    int retval;
+    int retval=0;
 
     // Sauvegarder les valeurs des registres dans des variables locales
     __asm__ __volatile__ (
@@ -83,14 +83,16 @@ void traitant_IT_49() {
     case CONS_WRITE:
         cons_write((char *)ebx_val, ecx_val);
         break;
-
+    case CONS_PUTBYTES:
+        console_putbytes((char *)ebx_val, ecx_val);
+        break;
     default:
         // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
         break;
     }
 
-    __asm__ __volatile__ ("movl %0, %%eax\n" : : "r"(retval));
+    //__asm__ __volatile__ ("movl %0, %%eax\n" : : "r"(retval));
 
-    __asm__ __volatile__ ("iret;");
-    return ;
+    //__asm__ __volatile__ ("iret");
+    return retval;
 }

@@ -3,6 +3,7 @@
 
 enum Builtin {
     GETPID,
+    CONS_PUTBYTES,
     START,
     EXIT,
     KILL,

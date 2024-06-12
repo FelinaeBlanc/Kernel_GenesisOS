@@ -175,6 +175,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
 int getpid(void){
     // return pid de pro elu
     printf("Pourquoi je passe pas la HELP!\n");
+    printf("Je devrais etre %d\n", ProcElu->pid);
     return ProcElu != NULL ? ProcElu->pid :  -1;
 }
 
@@ -356,7 +357,7 @@ void init_ordonnanceur(){
 
     init_files(); // Init les files !
     init_horloge(); // Init l'horloge après...
-    init_traitant_IT(49, traitant_IT_49);
+    init_traitant_IT(49, traitant_IT_49, IT49);
 
     //int fnc = 0x100000;
     int (*user_start)(void*) = (int (*)(void*))0x1000000; // 16M

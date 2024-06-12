@@ -81,12 +81,12 @@ void clock_settings(unsigned long *quartz, unsigned long *ticks){
 
 // Ajoute le traitant et l'ajoute au numéro spécifique dans
 // la table des vecteurs d'interrutpion
-void init_traitant_IT(uint32_t num_IT, void (*traitant)(void)){
+void init_traitant_IT(uint32_t num_IT, void (*traitant)(void), int masque){
     uint32_t* tab_addr = (uint32_t*)0x1000;
     uint32_t res = (uint32_t)traitant;
 
     tab_addr[num_IT*2] = (res & 0x0000FFFF) | (KERNEL_CS << 16);
-    tab_addr[num_IT*2+1] = (res & 0xFFFF0000) | 0x8E00;
+    tab_addr[num_IT*2+1] = (res & 0xFFFF0000) | masque;
 }
 
 // Règle la fréquence des signaux
@@ -137,6 +137,6 @@ void affiche_date(){
 
 void init_horloge(void) {
     reg_frequence(); // Configure la fréquence d'appel de TIC PIT
-    init_traitant_IT(32, traitant_IT_32); // Installe le gestionnaire d'interruptions pour l'horloge
+    init_traitant_IT(32, traitant_IT_32, IT32); // Installe le gestionnaire d'interruptions pour l'horloge
     sign_clock(); // Démasque l'IRQ 0 (horloge)
 }

@@ -28,4 +28,6 @@ extern void cons_echo(int);
 extern void cons_read(char *, int);
 extern void cons_write(char *, int);
 
+extern void console_putbytes(const char *s, int len);
+
 #endif

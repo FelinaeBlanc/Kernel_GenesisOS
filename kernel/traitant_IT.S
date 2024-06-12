@@ -1,6 +1,6 @@
 # cette directive sert a rendre l’etiquette publique
     .text
-    .globl traitant_IT_32
+    .globl traitant_IT_32, traitant_IT_49
 
 # debut du traitant
 traitant_IT_32:
@@ -15,4 +15,8 @@ traitant_IT_32:
     popl %edx
     popl %eax
     # fin du traitant
+    iret
+
+traitant_IT_49:
+    call  traitant_IT_49_switch
     iret
