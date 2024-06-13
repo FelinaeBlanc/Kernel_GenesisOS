@@ -12,6 +12,7 @@
 #include "files.h" // Pour les files (chprio)
 #include "traitant_IT_49.h"
 #include "segment.h"
+#include "processor_structs.h"
 
 PidLibre * PidLibreTete;
 Processus * tableDesProcs[MAX_PROCESS];
@@ -315,7 +316,7 @@ void ordonnanceur(void){
 
         // printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
 
-
+        tss.esp0 = ProcElu->contexte[1];
         ctx_sw(procEluActuel->contexte,ProcElu->contexte);
     }
 }
