@@ -6,6 +6,7 @@
 #include "console.h"
 #include "segment.h"
 #include "stdbool.h"
+#include "kbd.h"
 
 uint16_t ligne, colonne;
 bool echo = true; 
@@ -13,7 +14,7 @@ bool echo = true;
 // revoie l'adresse mémoir de lig col
 uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 {
-    return (uint16_t*)(0xB8000 + 2 * (lig * LARGEUR + col)) ;
+    return (uint16_t*)(DEBUT_MEM + 2 * (lig * LARGEUR + col)) ;
 }
 
 
@@ -38,14 +39,14 @@ void efface_ecran(void){
 
 void place_curseur(uint32_t lig, uint32_t col)
 {
-    outb(0x0F, 0x3D4);
+    outb(0x0F, SELECT_PORT);
     uint16_t pos = (uint16_t)(col + lig * LARGEUR);
     uint8_t pos_bas = (uint8_t)pos;
-    outb(pos_bas, 0x3D5);
+    outb(pos_bas, RW_PORT);
 
-    outb(0x0E, 0x3D4);
+    outb(0x0E, SELECT_PORT);
     uint8_t pos_haut = (uint8_t)(pos >> 8);
-    outb(pos_haut, 0x3D5);
+    outb(pos_haut, RW_PORT);
 
     ligne = lig;
     colonne = col;
@@ -58,15 +59,15 @@ void traite_car(char c, uint8_t ct ){
 
     switch (c)
     {
-    case '\b':
-        if (colonne >0) 
-        place_curseur(ligne, colonne-1);
-        else {
+    case '\b': // BS
+        if (colonne >0) { 
+            place_curseur(ligne, colonne-1);
+        } else {
             place_curseur(ligne, 0);
         }
         break;
 
-    case '\t':
+    case '\t': // HT
         if (colonne%8 == 0) colonne++;
         col = colonne + (8 - colonne)%8;
         lig = ligne;
@@ -75,17 +76,22 @@ void traite_car(char c, uint8_t ct ){
         } 
         place_curseur(lig, col);
         break;
-    case '\n':
+    case '\n': // LF
         place_curseur((ligne+1)%HAUTEUR, 0);
         break;
     case '\f':
         efface_ecran();
         place_curseur(0,0);
         break;
-    case '\r':
+    case '\r': // CR
         place_curseur(ligne, 0);
         break;
-    
+    case 127: // DEL
+        if (colonne > 0) {
+            ecrit_car(ligne, colonne - 1, ct, NOIR, FALSE, ' ');
+            place_curseur(ligne, colonne - 1);
+        }
+        break;
     default:
         if (c <= 126 && c >= 32){
             ecrit_car(ligne, colonne, ct, NOIR, FALSE, c);
@@ -166,3 +172,12 @@ void cons_write(const char *str, long size){
     }
 }
 
+/* cons_read prélève une ligne contenue dans le tampon associé au clavier pour la transférer à l'appelant.
+ Si aucune ligne n'est disponible, l'appelant est bloqué jusqu'à la frappe du prochain caractère de fin de ligne.*/
+ 
+int cons_read(char *string, unsigned long length){
+    // on recupère le tampon remplie ici
+    length = length;
+    strcpy(string, tampon);
+    return 0;
+}

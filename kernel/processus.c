@@ -11,6 +11,7 @@
 #include "stdbool.h"
 #include "files.h" // Pour les files (chprio)
 #include "traitant_IT_49.h"
+#include "traitant_IT_33.h"
 #include "segment.h"
 #include "processor_structs.h"
 
@@ -355,6 +356,9 @@ void init_ordonnanceur(){
     init_files(); // Init les files !
     init_horloge(); // Init l'horloge après...
     init_traitant_IT(49, traitant_IT_49, IT49);
+
+    init_traitant_IT(33, traitant_IT_33, IT33);
+    masque_IRQ(1 , false);
 
     int (*user_start)(void*) = (int (*)(void*))USER_START; // 16M
     start(user_start, 0, 1, "USER", NULL);

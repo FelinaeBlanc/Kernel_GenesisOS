@@ -210,7 +210,14 @@ int traitant_IT_49_switch() {
         }
 
         case CONS_READ:
-            // cons_read()
+            // char *string;
+            // unsigned long length;
+            // __asm__ __volatile__ (
+            //     "movl %%ebx, %0\n"
+            //     "movl %%ecx, %1\n"
+            //     : "=r"(string), "=r"(length)
+            // );
+            // retval = cons_read(string, length);
             break;
 
         case CONS_WRITE: {
