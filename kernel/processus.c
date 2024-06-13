@@ -268,7 +268,8 @@ void free_mourant_queue(){
 
         tableDesProcs[procMort->pid] = NULL;
         add_pid(procMort->pid); // On libère le pid
-        mem_free(procMort->pileKernel, procMort->pileSizeKernel ); // On libère la pile
+        mem_free(procMort->pileKernel, procMort->pileSizeKernel ); // On libère la pile kernel
+        user_stack_free(procMort->pileUser, procMort->pileSizeUser); // On libère la pile user
         mem_free(procMort, sizeof(Processus));
     }
 }
@@ -281,8 +282,9 @@ void free_mourant_queue(){
 //     && (proc->pileKernel[nbMot - 1] == CANARY_VALUE_A && proc->pileKernel[nbMot - 2] == CANARY_VALUE_B && proc->pileKernel[nbMot - 3] == CANARY_VALUE_C);
 // }
 
-/***********END TEST FNC*********/
+/***********Ordonnanceur*********/
 void ordonnanceur(void){
+
     free_mourant_queue();
     //free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
@@ -294,19 +296,17 @@ void ordonnanceur(void){
         }*/
 
         switch (procEluActuel->etat) {
-            case ENDORMI:
-                queue_add(procEluActuel, &proc_endormis, Processus, chainage, secReveille);
-                break;
             case MOURANT:
                 queue_add(procEluActuel, &proc_mourants, Processus, chainage, prio);
                 break;
-            case ZOMBIE: // On ne doit pas rajouter dans la liste si Zombie ou Attend
-            case ATTEND_FILE:
-            case ATTEND_FILS:
-                break;
-            default: // Est activable sinon !
+
+            case ELU:
+            case ACTIVABLE: // Est activable sinon !
                 procEluActuel->etat = ACTIVABLE;
                 queue_add(procEluActuel, &proc_activables, Processus, chainage, prio);
+                break;
+                
+            default:
                 break;
         }
 
@@ -314,9 +314,8 @@ void ordonnanceur(void){
         procEluSuiv->etat = ELU;
         ProcElu = procEluSuiv; 
 
-        // printf("Nouveau Ordonnanceur: Processus élu %d (%s) Meme:%d\n", ProcElu->pid, ProcElu->nom,ProcElu==procEluActuel);
-
-        tss.esp0 = ProcElu->contexte[1];
+        int32_t nbMotKernel = ProcElu->pileSizeKernel / sizeof(int32_t);
+        tss.esp0 =  (int) &ProcElu->pileKernel[nbMotKernel-1];//ProcElu->contexte[1];
         ctx_sw(procEluActuel->contexte,ProcElu->contexte);
     }
 }
@@ -365,11 +364,12 @@ void init_ordonnanceur(){
 /*******Endormi******/
 void wait_clock(unsigned long ticks){
     // On assume que IDLE n'appelle jamais wait_clock 
-
-    Processus * procEndormir = ProcElu;
-    procEndormir->etat = ENDORMI;
-    procEndormir->secReveille = current_clock()+ticks; // On ajoute le temps de réveil
-    
+    //affiche_table_process();
+    Processus * procEndormi = ProcElu;
+    procEndormi->etat = ENDORMI;
+    procEndormi->secReveille = current_clock()+ticks; // On ajoute le temps de réveil
+    queue_add(procEndormi, &proc_endormis, Processus, chainage, secReveille);
+    // printf("Je m'endors %s %d %d\n", procEndormir->nom,procEndormir->etat,procEndormir->secReveille );
     ordonnanceur();
 }
 

@@ -6,11 +6,15 @@
 #include "stdbool.h"
 
 #define ULONG_MAX ((unsigned long)(~0UL))
+
 #define MAX_PROCESS 50
+
 #define PRIO_MAX 255
 #define PRIO_IDLE 0
-#define KERNEL_STACK_SIZE 512
-#define USER_STACK_SIZE 512
+
+#define KERNEL_STACK_SIZE 5120
+#define USER_STACK_SIZE 5120
+
 #define EXIT_ROUTINE 0x1100000
 #define USER_START 0x1000000
 
