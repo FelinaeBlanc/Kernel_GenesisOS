@@ -106,6 +106,10 @@ void traite_car(char c, uint8_t ct ){
         generer_bip();
         break;
     default:
+        if(c<32){
+            traite_car(94, BLANC);
+            c = 64 + c;
+        }
         if (c <= 126 && c >= 32){
             ecrit_car(ligne, colonne, ct, NOIR, FALSE, c);
             col = colonne +1;
