@@ -9,62 +9,44 @@ char tampon[BUFFER_SIZE];
 int ptampon = 0;
 bool read=false;
 
-void keyboard_data(char *str){
-	// on remplie le tampon ici
-	int i = 0;
+void keyboard_data(char *str) {
+    int i = 0;
 
-	// recopie les nouveaux caractères disponibles dans le tampon associé au clavier.
-	while(ptampon < BUFFER_SIZE && i < (int)strlen(str)) {
-		// printf("Prout %d\n",(int)str[i]);
-		// on gere ici le echo 
-		// traite_car(str[i], VERT);
+    while (ptampon < BUFFER_SIZE && i < (int)strlen(str)) {
+        char c = str[i];
 
-		char c = str[i];
+        if (echo) {
+            traite_car(c, BLANC);
+        }
 
-		if(echo){
-			traite_car(c, BLANC);
-		}
-
-		switch (c)
-		{
-		case 127:
-			if (ptampon%LARGEUR != 0){
-				ptampon--;
-			}
-			break;
-		case '\t':
-			tampon[ptampon] = str[i];
-			ptampon++;
-			verifie_es();
-			break;
-		
-		case '\n':
-			tampon[ptampon] = str[i];
-			ptampon++;
-			verifie_es();
-			break;
-
-		case '\r':
-			read = true;
-			verifie_es();
-			break;
-
-		default:
-			if (c <= 126 && c >= 32){
-				tampon[ptampon] = str[i];
+        switch (c) {
+            case 127: // Backspace
+                if (ptampon > 0) {
+                    ptampon--;
+                }
+                break;
+            case '\t':
+            case '\n':
+                tampon[ptampon] = str[i];
 				ptampon++;
 				verifie_es();
-			}
-			break;
-		}
-		i++;
-	}
+				break;
+			case '\r':
+				read = true;
+				verifie_es();
+				break;
+            default:
+                if (c >= 32 && c <= 126) {
+                    tampon[ptampon++] = c;
+                    verifie_es();
+                }
+                break;
+        }
+        i++;
+    }
 
-	if(ptampon == BUFFER_SIZE) {
-		verifie_es();
-		traite_car('\a', BLANC);
-		return;
-	}
-
-	return;
+    if (ptampon == BUFFER_SIZE) {
+        verifie_es();
+        traite_car('\a', BLANC); // Sonnerie
+    }
 }

@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "stdio.h"
-
 #include "stdint.h"
 #include "string.h"
 #include "console.h"
@@ -65,7 +64,16 @@ void generer_bip(void)
     outb(0x61, inb(0x61) & 0xFC); // Désactiver le haut-parleur
 }
 
-void traite_car(char c, uint8_t ct ){
+void defilement(void) {
+    memmove(ptr_mem(0, 0), ptr_mem(1, 0), (HAUTEUR - 1) * LARGEUR * 2);
+
+    for (uint32_t j = 0; j < LARGEUR; j++) {
+        ecrit_car((HAUTEUR - 1), j, NOIR, NOIR, FALSE, ' ');
+    }
+    place_curseur((HAUTEUR - 1), 0);
+}
+
+void traite_car(char c, uint8_t ct) {
     uint32_t lig, col;
 
     switch (c)
@@ -106,6 +114,10 @@ void traite_car(char c, uint8_t ct ){
         generer_bip();
         break;
     default:
+        if(c<32){
+            traite_car(94, BLANC);
+            c = 64 + c;
+        }
         if (c <= 126 && c >= 32){
             ecrit_car(ligne, colonne, ct, NOIR, FALSE, c);
             col = colonne +1;
@@ -119,110 +131,67 @@ void traite_car(char c, uint8_t ct ){
         }
         break;
     }
+    if (ligne == HAUTEUR - 1) {
+        defilement();
+        ligne--;
+}
 }
 
-
-void defilement(void){
-
-    memmove(ptr_mem(0,0), ptr_mem(1, 0), (HAUTEUR-1)*LARGEUR*2);
-
-
-    for(uint32_t j=0; j<LARGEUR; j++){
-        ecrit_car((HAUTEUR-1), j, NOIR, NOIR, FALSE, ' ');
-    }
-    place_curseur((HAUTEUR-1), 0);
-}
 
 /*
  * This is the function called by printf to send its output to the screen. You
  * have to implement it in the kernel and in the user program.
  */
-void console_putbytes(const char *s, int len){
-    int i=0;
-    int j=0;
-
-    while(i*HAUTEUR + j < len){
-        traite_car(s[i*HAUTEUR + j], BLANC);
-        j++;
-        if (j>=HAUTEUR){
-            j = j%HAUTEUR;
-            i++;
-        }
-        if(ligne == HAUTEUR-1){
-            defilement();
-            ligne --;
-        }
+void console_putbytes(const char *s, int len) {
+    for (int i = 0; i < len; i++) {
+        traite_car(s[i], BLANC);
     }
-   
 }
 
 /* Si on est nul, désactive l'écho sur la console, sinon le réactive.*/
-void cons_echo(int on){
-    if(on == 0){
-        echo = false;
-    }
-    else {
-        echo = true;
-    }
+void cons_echo(int on) {
+    echo = on ? true : false;
 }
 
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
-void cons_write(const char *str, long size){
-    int i=0;
-    int j=0;
-
-    while(i*HAUTEUR + j < size){
-        traite_car(str[i*HAUTEUR + j], BLANC);
-        j++;
-        if (j>=HAUTEUR){
-            j = j%HAUTEUR;
-            i++;
-        }
-        if(ligne == HAUTEUR-1){
-            defilement();
-            ligne --;
-        }
+void cons_write(const char *str, long size) {
+    for (long i = 0; i < size; i++) {
+        traite_car(str[i], BLANC);
     }
 }
 
 /* cons_read prélève une ligne contenue dans le tampon associé au clavier pour la transférer à l'appelant.
- Si aucune ligne n'est disponible, l'appelant est bloqué jusqu'à la frappe du prochain caractère de fin de ligne.*/
- 
-int cons_read(char *string, unsigned long length){
-    
-    if(length == 0) return 0;
+ Si aucune ligne n'est disponible, l'appelant est bloqué jusqu'à la frappe du prochain caractère de fin de ligne. */
+int cons_read(char *string, unsigned long length) {
+    if (length == 0) return 0;
 
-    while(!read && ptampon < (int)length) {
+    while (!read && ptampon < (int)length) { // On attend de pouvoir lire
         ProcElu->etat = ATTEND_ES;
         queue_add(ProcElu, &proc_bloque_es, Processus, chainage, prio);
         ordonnanceur();
     }
 
-
-    int i=0;
-    while (i<(int)length && i<ptampon) {
+    printf("ptampon : %d\n", ptampon);
+    // Lecture des données depuis le tampon
+    read = false;
+    int i = 0;
+    while (i < (int)length || i < ptampon) {
         string[i] = tampon[i];
         i++;
     }
 
-    int retval = 0;
-    if((int)length < ptampon) {
-        retval = (int)length;
+    int retval = i;
+
+    // Décalage des données restantes dans le tampon
+    if (i < ptampon) {
+        memmove(tampon, tampon + i, ptampon - i);
+        ptampon -= i;
     } else {
-        retval = ptampon;
+        ptampon = 0;
     }
 
-    if (i!=ptampon){
-        int j = 0;
-        while(j+i<ptampon){
-            tampon[j] = tampon[i+j];
-            j++;
-        }
-        ptampon = ptampon - i;
-    }
+    // Remplir le reste du tampon avec des zéros pour le vider
+    memset(tampon + ptampon, 0, BUFFER_SIZE );
 
-    if(ptampon == 0){
-        read = false;
-    }
     return retval;
 }
