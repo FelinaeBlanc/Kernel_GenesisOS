@@ -2,6 +2,7 @@
 #define BUILTIN_H
 
 extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
+extern void exit_kernel(void);
 extern void exit(int retval);
 extern int kill(int pid);
 

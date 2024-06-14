@@ -14,6 +14,7 @@
 #include "traitant_IT_33.h"
 #include "segment.h"
 #include "processor_structs.h"
+#include "cpu.h"
 
 PidLibre * PidLibreTete;
 Processus * tableDesProcs[MAX_PROCESS];
@@ -431,6 +432,11 @@ void verifie_es(void){
 }
 
 /*****Exit*****/
+// Sort du noyau
+void exit_kernel(void){
+    outw(0x2000, 0x604);
+}
+
 // etval est passée à son père quand il appelle waitpid
 void exit(int retval){
     Processus * procMort = ProcElu;

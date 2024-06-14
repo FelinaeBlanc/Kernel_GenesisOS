@@ -106,6 +106,7 @@ extern void verifie_reveille(unsigned long ticks);
 extern void verifie_es(void);
 
 /*****Exit*****/
+extern void exit_kernel(void);
 
 extern void exit(int retval);
 

@@ -5,7 +5,7 @@
 #define CONS_PUTBYTES 1
 #define START 2
 #define EXIT 3
-#define KILL 4
+#define KILL 4 
 // #define MON_NOM 5
 #define GETPRIO 6
 #define CHPRIO 7
@@ -22,5 +22,6 @@
 #define CONS_ECHO 18
 #define CONS_READ 19
 #define CONS_WRITE 20
+#define EXIT_KERNEL 21
 
 #endif

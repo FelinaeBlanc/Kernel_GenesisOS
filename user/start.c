@@ -3,30 +3,146 @@
 #include "builtin.h"
 #include "string.h"
 #include "test.h"
+#include "utils.h"
+#include "stdbool.h"
 
 #define CMD_SIZE 25
 
-int superShell(void*){
-  
-  while (1){
-    char str[CMD_SIZE];
-    printf("$ ");
-    cons_read(str, CMD_SIZE);
-    if (strcmp(str, "exit") == 0)
-      break;
-    
-    else if (strcmp(str, "help")==0){
-      printf("exit:        sortie du noyau\n");
-      printf("ps  :        informations sur les processus existants\n");
-      
-    }
+typedef struct {
+    char *cmd;
+    void (*func)(int, char**);
+    char *help;
+    bool canCrashKernel;
+} Command;
 
-  }
-
-  return 0;
+int proc_runner_until(void * arg){
+    int num = (int)arg;
+    test_until(num);
+    return 0;
+}
+int proc_runner(void * arg){
+    int num = (int)arg;
+    test_run(num);
+    return 0;
 }
 
-int proc_runner(){
+void cmd_test_run(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Utilisation: test_run <num>\n");
+        return;
+    }
+    int num = atoi(argv[1]);
+    start(&proc_runner, 4000, 128, NULL, (void*)num);
+}
+
+void cmd_test_until(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Utilisation: test_until <num>\n");
+        return;
+    }
+    int num = atoi(argv[1]);
+    start(&proc_runner_until, 4000, 128, NULL, (void*)num);
+}
+
+void cmd_exit(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+
+    int cpt = 3;
+    while (cpt > 0) {
+        printf("Fermeture dans %d secondes\n", cpt);
+        wait_clock(100);
+        cpt--;
+    }
+    printf("Sortie du noyau imminent...\n");
+    exit_kernel();
+    exit(0);
+}
+
+void cmd_help(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+    extern Command commands[];
+    extern int num_commands;
+    printf("Commandes disponibles :\n");
+    for (int i = 0; i < num_commands; ++i) {
+        printf("-    %s: %s %s\n", commands[i].cmd, commands[i].canCrashKernel ? "[Dangereux]" : "[Sur]", commands[i].help);
+    }
+}
+
+void cmd_ps(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+    if (argc > 1 && strcmp(argv[1], "-a") == 0) {
+        printf("Liste de tous les processus (simulation)\n");
+    } else {
+        printf("Liste des processus (simulation)\n");
+    }
+}
+
+void parse_command(char *input, int *argc, char *argv[]) {
+    *argc = 0;
+    char *token = strtok(input, " ");
+    while (token != NULL) {
+        argv[(*argc)++] = token;
+        token = strtok(NULL, " ");
+    }
+    argv[*argc] = NULL; // Terminator for the array of strings
+}
+
+Command commands[] = {
+    {"test_run", cmd_test_run, "Lancer un test", true},
+    {"test_until", cmd_test_until, "Lancer un test jusqu a un certain nombre de ticks", true},
+    {"ps", cmd_ps, "Lister les processus", false},
+    {"exit", cmd_exit, "Sortir du noyau", false},
+    {"help", cmd_help, "Afficher aide", false}
+    
+};
+
+int num_commands = sizeof(commands) / sizeof(commands[0]);
+
+int superShell(void *arg) {
+    (void)arg; // Pour éviter l'avertissement sur le paramètre non utilisé
+
+    while (true) {
+        char str[CMD_SIZE];
+        char *argv[CMD_SIZE / 2 + 1];  // Pointeurs pour chaque argument
+        int argc;
+
+        printf("$ ");
+        cons_read(str, CMD_SIZE);
+        parse_command(str, &argc, argv);
+
+        if (argc == 0) continue;  // Pas de commande entrée
+
+        int found = 0;
+        for (int i = 0; i < num_commands; ++i) {
+            if (strcmp(argv[0], commands[i].cmd) == 0) {
+                // Si la fonction est dangereuse, demander confirmation
+                if (commands[i].canCrashKernel) {
+                    printf("Attention: cette commande peut planter le noyau. Continuer? (o/n)\n");
+                    char c;
+                    cons_read(&c, 1);
+                    if (c != 'o') {
+                        printf("Commande annulée.\n");
+                        continue;
+                    }
+                }
+                commands[i].func(argc, argv);
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            printf("Commande non reconnue: %s\n", argv[0]);
+            printf("Tapez 'help' pour voir la liste des commandes.\n");
+        }
+    }
+
+    return 0;
+}
+int c_runner(void){
   // printf("proc runner !\n");
   //test_until(20);
   //test_run(17);
@@ -55,7 +171,7 @@ void printWelcomeMessage() {
 void user_start(void) {
   printWelcomeMessage(NULL);
   //start(&proc_runner, 4000, 128, NULL, NULL);
-  start(&superShell, 4000, 1, NULL, NULL);
+  start(&superShell, 4000, 2, "superShell", NULL);
 
   return;
 }

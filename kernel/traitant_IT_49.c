@@ -110,7 +110,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
                 return -1;
             cons_write((const char *)ebx_val, ecx_val);
             break;
-
+        case EXIT_KERNEL:
+            exit_kernel();
+            break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
             break;
