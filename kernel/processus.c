@@ -112,9 +112,12 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
         mem_free(proc, sizeof(Processus));
         return -1;
     }
+    
+    if (name == NULL){
+        name = "NoName";
+    }
+    strncpy(proc->nom, name, sizeof(proc->nom) - 1);
 
-    // on gere les attribus
-    strcpy(proc->nom, name); // <-------- ATTENTION PROBLEME SECURITE TODO
     proc->pid = pid;
     proc->etat = ACTIVABLE;
     proc->secReveille = 0;

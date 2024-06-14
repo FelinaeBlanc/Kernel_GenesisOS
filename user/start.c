@@ -7,13 +7,13 @@
 int proc_runner(){
   // printf("proc runner !\n");
   //test_until(20);
-  test_run(17);
+  //test_run(17);
   return 0;
 }
 
 void user_start(void) {
   //char str[5];
-  start(&proc_runner, 4000, 128, "proc_runner", NULL);
+  start(&proc_runner, 4000, 128, NULL, NULL);
 
   //cons_read(str, 5);
 
