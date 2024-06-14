@@ -220,5 +220,9 @@ int cons_read(char *string, unsigned long length){
         }
         ptampon = ptampon - i;
     }
+
+    if(ptampon == 0){
+        read = false;
+    }
     return retval;
 }
