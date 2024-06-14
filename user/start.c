@@ -7,8 +7,7 @@
 int proc_runner(){
   // printf("proc runner !\n");
   //test_until(20);
-  test_run(19);
-  printf("Proc runner fini!!!!!!!!!!!!!!!!!!!!!\n");
+  test_run(17);
   return 0;
 }
 
