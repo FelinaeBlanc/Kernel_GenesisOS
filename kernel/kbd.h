@@ -22,7 +22,7 @@
 #ifndef __KBD_H__
 #define __KBD_H__
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 256
 
 #include "stdint.h"
 #include "stdbool.h"

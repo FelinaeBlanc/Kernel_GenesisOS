@@ -35,11 +35,13 @@ void keyboard_data(char *str){
 		case '\t':
 			tampon[ptampon] = str[i];
 			ptampon++;
+			verifie_es();
 			break;
 		
 		case '\n':
 			tampon[ptampon] = str[i];
 			ptampon++;
+			verifie_es();
 			break;
 
 		case '\r':
@@ -51,6 +53,7 @@ void keyboard_data(char *str){
 			if (c <= 126 && c >= 32){
 				tampon[ptampon] = str[i];
 				ptampon++;
+				verifie_es();
 			}
 			break;
 		}
