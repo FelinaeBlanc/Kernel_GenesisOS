@@ -100,7 +100,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
             break;
 
         case CONS_READ:
-            // cons_read()  // Implémentation manquante
+            if (!isUserSpace(ebx_val))
+                return -1;
+            retval = cons_read((char *)ebx_val, ecx_val);
             break;
 
         case CONS_WRITE:
