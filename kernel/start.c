@@ -5,8 +5,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "horloge.h"
-#include "files.h"
-#include "test.h"
 
 int idle() {
   // printf("JE SUIS ENTREE DANS IDLE\n");
@@ -17,20 +15,11 @@ int idle() {
   }
 }
 
-int proc_runner(){
-  // printf("proc runner !\n");
-  test_run(14);
-  printf("Proc runner fini!!!!!!!!!!!!!!!!!!!!!\n");
-  return 0;
-}
-
 void kernel_start(void)
 {
   printf("\f");
 
   init_ordonnanceur(); // Init l'ordonnanceur
-  //start(&proc_runner, 4000, 128, "proc_runner", NULL);
-  // printf("C'est bon!");
   idle();
   
   return;

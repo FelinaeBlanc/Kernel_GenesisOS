@@ -24,7 +24,7 @@
 // #define CANARY_VALUE_B (int32_t)0xCAFEBABE
 // #define CANARY_VALUE_C (int32_t)0xBEEFCAFE
 
-enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE }; // + ATTEND_ES ??
+enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE, ATTEND_ES};
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 typedef struct _PidLibre {
@@ -71,6 +71,7 @@ struct Fils {
 
 // Déclaration des variables globales de processus
 extern struct list_link proc_activables;
+extern struct list_link proc_bloque_es;
 
 extern Processus * ProcIdle;
 extern Processus * ProcElu;
@@ -101,6 +102,8 @@ extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const cha
 extern void wait_clock(unsigned long ticks);
 
 extern void verifie_reveille(unsigned long ticks);
+
+extern void verifie_es(void);
 
 /*****Exit*****/
 

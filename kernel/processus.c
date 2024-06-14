@@ -11,6 +11,7 @@
 #include "stdbool.h"
 #include "files.h" // Pour les files (chprio)
 #include "traitant_IT_49.h"
+#include "traitant_IT_33.h"
 #include "segment.h"
 #include "processor_structs.h"
 
@@ -33,11 +34,13 @@ void affiche_table_process(){
 LIST_HEAD(proc_activables);
 LIST_HEAD(proc_endormis);
 LIST_HEAD(proc_mourants);
+LIST_HEAD(proc_bloque_es);
 
 void init_listes(void) {
     INIT_LIST_HEAD(&proc_activables);
     INIT_LIST_HEAD(&proc_endormis);
     INIT_LIST_HEAD(&proc_mourants);
+    INIT_LIST_HEAD(&proc_bloque_es);
 }
 
 // retourne le pid en tete (PidLibreTete), déplace la tete ensuite
@@ -356,6 +359,9 @@ void init_ordonnanceur(){
     init_horloge(); // Init l'horloge après...
     init_traitant_IT(49, traitant_IT_49, IT49);
 
+    init_traitant_IT(33, traitant_IT_33, IT33);
+    masque_IRQ(1 , false);
+
     int (*user_start)(void*) = (int (*)(void*))USER_START; // 16M
     start(user_start, 0, 1, "USER", NULL);
 }
@@ -401,6 +407,22 @@ void verifie_reveille(unsigned long ticks) {
     }
 
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
+        ordonnanceur();
+    }
+}
+
+void verifie_es(void){
+
+    Processus *current = queue_out(&proc_bloque_es, Processus, chainage);
+
+    // on a pas de proc bloqué
+    if(current==NULL) return;
+
+    // on reveille l'élement 
+    current->etat = ACTIVABLE; 
+    queue_add(current, &proc_activables, Processus, chainage, prio);
+
+    if(ProcElu->prio > current->prio){
         ordonnanceur();
     }
 }
