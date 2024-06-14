@@ -22,10 +22,14 @@
 #ifndef __KBD_H__
 #define __KBD_H__
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 3
+
+#include "stdint.h"
+#include "stdbool.h"
 
 extern char tampon[BUFFER_SIZE];
 extern int ptampon;
+extern bool read;
 
 /* Call this function for each scancode received to translate them to
 characters. */

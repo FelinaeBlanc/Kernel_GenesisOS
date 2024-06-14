@@ -34,11 +34,13 @@ void affiche_table_process(){
 LIST_HEAD(proc_activables);
 LIST_HEAD(proc_endormis);
 LIST_HEAD(proc_mourants);
+LIST_HEAD(proc_bloque_es);
 
 void init_listes(void) {
     INIT_LIST_HEAD(&proc_activables);
     INIT_LIST_HEAD(&proc_endormis);
     INIT_LIST_HEAD(&proc_mourants);
+    INIT_LIST_HEAD(&proc_bloque_es);
 }
 
 // retourne le pid en tete (PidLibreTete), déplace la tete ensuite
@@ -405,6 +407,22 @@ void verifie_reveille(unsigned long ticks) {
     }
 
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
+        ordonnanceur();
+    }
+}
+
+void verifie_es(void){
+
+    Processus *current = queue_out(&proc_bloque_es, Processus, chainage);
+
+    // on a pas de proc bloqué
+    if(current==NULL) return;
+
+    // on reveille l'élement 
+    current->etat = ACTIVABLE; 
+    queue_add(current, &proc_activables, Processus, chainage, prio);
+
+    if(ProcElu->prio > current->prio){
         ordonnanceur();
     }
 }

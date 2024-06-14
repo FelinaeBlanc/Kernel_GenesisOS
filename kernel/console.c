@@ -7,6 +7,8 @@
 #include "segment.h"
 #include "stdbool.h"
 #include "kbd.h"
+#include "processus.h"
+#include "queue.h"
 
 uint16_t ligne, colonne;
 bool echo = true; 
@@ -52,22 +54,30 @@ void place_curseur(uint32_t lig, uint32_t col)
     colonne = col;
 }
 
+void generer_bip(void)
+{
+    // Générer un bip sonore en interagissant avec le matériel (haut-parleur du PC)
+    outb(0x61, inb(0x61) | 3); // Activer le haut-parleur
+    outb(0x43, 0xB6);          // Définir le mode
+    outb(0x42, 0xB0);          // Fréquence basse
+    outb(0x42, 0xB0);          // Fréquence haute
+    for (volatile int i = 0; i < 1000; i++); // Pause pour la durée du bip
+    outb(0x61, inb(0x61) & 0xFC); // Désactiver le haut-parleur
+}
+
 void traite_car(char c, uint8_t ct ){
     uint32_t lig, col;
 
-    if(!echo) return;
-
     switch (c)
     {
-    case '\b': // BS
+    case '\b': // BS 8
         if (colonne >0) { 
             place_curseur(ligne, colonne-1);
         } else {
             place_curseur(ligne, 0);
         }
         break;
-
-    case '\t': // HT
+    case '\t': // HT 9
         if (colonne%8 == 0) colonne++;
         col = colonne + (8 - colonne)%8;
         lig = ligne;
@@ -76,21 +86,24 @@ void traite_car(char c, uint8_t ct ){
         } 
         place_curseur(lig, col);
         break;
-    case '\n': // LF
+    case '\n': // LF 10
         place_curseur((ligne+1)%HAUTEUR, 0);
         break;
     case '\f':
         efface_ecran();
         place_curseur(0,0);
         break;
-    case '\r': // CR
-        place_curseur(ligne, 0);
+    case '\r': // CR 13
+        place_curseur(ligne+1, 0);
         break;
     case 127: // DEL
         if (colonne > 0) {
             ecrit_car(ligne, colonne - 1, ct, NOIR, FALSE, ' ');
             place_curseur(ligne, colonne - 1);
         }
+        break;
+    case '\a': // BEL 7
+        generer_bip();
         break;
     default:
         if (c <= 126 && c >= 32){
@@ -176,8 +189,36 @@ void cons_write(const char *str, long size){
  Si aucune ligne n'est disponible, l'appelant est bloqué jusqu'à la frappe du prochain caractère de fin de ligne.*/
  
 int cons_read(char *string, unsigned long length){
-    // on recupère le tampon remplie ici
-    length = length;
-    strcpy(string, tampon);
-    return 0;
+    
+    if(length == 0) return 0;
+
+    while(!read && ptampon < (int)length) {
+        ProcElu->etat = ATTEND_ES;
+        queue_add(ProcElu, &proc_bloque_es, Processus, chainage, prio);
+        ordonnanceur();
+    }
+
+
+    int i=0;
+    while (i<(int)length && i<ptampon) {
+        string[i] = tampon[i];
+        i++;
+    }
+
+    int retval = 0;
+    if((int)length < ptampon) {
+        retval = (int)length;
+    } else {
+        retval = ptampon;
+    }
+
+    if (i!=ptampon){
+        int j = 0;
+        while(j+i<ptampon){
+            tampon[j] = tampon[i+j];
+            j++;
+        }
+        ptampon = ptampon - i;
+    }
+    return retval;
 }

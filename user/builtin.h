@@ -25,7 +25,7 @@ extern void wait_clock(unsigned long ticks);
 extern int waitpid(int, int *);
 
 extern void cons_echo(int);
-extern void cons_read(char *, int);
+extern int cons_read(char *, int);
 extern void cons_write(char *, int);
 
 extern void console_putbytes(const char *s, int len);
