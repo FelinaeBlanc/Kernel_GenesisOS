@@ -17,6 +17,8 @@
 
 #define EXIT_ROUTINE 0x1100000
 #define USER_START 0x1000000
+#define USER_END 0x3000000
+
 
 // #define CANARY_VALUE_A (int32_t)0xDEADBEEF
 // #define CANARY_VALUE_B (int32_t)0xCAFEBABE

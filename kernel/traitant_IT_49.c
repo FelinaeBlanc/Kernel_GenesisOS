@@ -4,226 +4,110 @@
 #include "horloge.h"
 #include "console.h"
 
-int traitant_IT_49_switch() {
-    int eax_val;
-    int retval = 0;
+/******** Protections ********/
+bool isUserSpace(int addr){
+    return (addr == 0) || (addr >= USER_START && addr < USER_END);
+}
 
-    // Sauvegarder les valeurs des registres dans des variables locales
-    __asm__ __volatile__ (
-        "movl %%eax, %0\n"
-        : "=r"(eax_val)
-    );
+int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, int esi_val, int edi_val) {
+    int retval = 0;
 
     switch (eax_val) {
         case GETPID:
             retval = getpid();
             break;
 
-        case CONS_PUTBYTES: {
-            int len;
-            const char *s;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(s), "=r"(len)
-            );
-            console_putbytes(s, len);
+        case CONS_PUTBYTES:
+            if (!isUserSpace(ebx_val))
+                return -1;
+            console_putbytes((const char *)ebx_val, ecx_val);
             break;
-        }
 
-        case START: {
-            int (*pt_func)(void *);
-            unsigned long ssize;
-            int prio;
-            const char *name;
-            void *arg;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                "movl %%edx, %2\n"
-                "movl %%esi, %3\n"
-                "movl %%edi, %4\n"
-                : "=r"(pt_func), "=r"(ssize), "=r"(prio), "=r"(name), "=r"(arg)
-            );
-            retval = start(pt_func, ssize, prio, name, arg);
+        case START:
+            // Vérification adresse fonction et chaine de caractères
+            if (!isUserSpace(ebx_val) || !isUserSpace(esi_val))
+                return -1;
+
+            retval = start((int (*)(void *))ebx_val, ecx_val, edx_val, (const char *)esi_val, (void *)edi_val);
             break;
-        }
 
-        case EXIT: {
-            int ret;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(ret)
-            );
-            exit(ret);
+        case EXIT:
+            exit(ebx_val);
             break;
-        }
 
-        case KILL: {
-            int pid2;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(pid2)
-            );
-            retval = kill(pid2);
+        case KILL:
+            retval = kill(ebx_val);
             break;
-        }
 
-        case CHPRIO: {
-            int pid1;
-            int newprio;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(pid1), "=r"(newprio)
-            );
-            retval = chprio(pid1, newprio);
+        case CHPRIO:
+            retval = chprio(ebx_val, ecx_val);
             break;
-        }
 
-        // case MON_NOM:
-        //     retval = (int)mon_nom();
-        //     break;
-
-        case GETPRIO: {
-            int pid3;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(pid3)
-            ); 
-            retval = getprio(pid3);
+        case GETPRIO:
+            retval = getprio(ebx_val);
             break;
-        }
 
-        case PCOUNT: {
-            int fid2;
-            int *count1;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(fid2), "=r"(count1)
-            );
-            retval = pcount(fid2, count1);
+        case PCOUNT:
+            if (!isUserSpace(ecx_val))
+                return -1;
+            retval = pcount(ebx_val, (int *)ecx_val);
             break;
-        }
 
-        case PCREATE: {
-            int count;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(count)
-            );
-            retval = pcreate(count);
+        case PCREATE:
+            retval = pcreate(ebx_val);
             break;
-        }
 
-        case PDELETE: {
-            int fid1;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(fid1)
-            );
-            retval = pdelete(fid1);
+        case PDELETE:
+            retval = pdelete(ebx_val);
             break;
-        }
 
-        case PRECEIVE: {
-            int fid3;
-            int *message;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(fid3), "=r"(message)
-            );
-            retval = preceive(fid3, message);
+        case PRECEIVE:
+            if (!isUserSpace(ecx_val))
+                return -1;
+            retval = preceive(ebx_val, (int *)ecx_val);
             break;
-        }
 
-        case PRESET: {
-            int fid4;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(fid4)
-            );
-            retval = preset(fid4);
+        case PRESET:
+            retval = preset(ebx_val);
             break;
-        }
 
-        case PSEND: {
-            int fid5;
-            int message2;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(fid5), "=r"(message2)
-            );
-            retval = psend(fid5, message2);
+        case PSEND:
+            retval = psend(ebx_val, ecx_val);
             break;
-        }
 
-        case CLOCK_SETTINGS: {
-            unsigned long *q;
-            unsigned long *t;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(q), "=r"(t)
-            );
-            clock_settings(q, t);
+        case CLOCK_SETTINGS:
+            if (!isUserSpace(ebx_val) || !isUserSpace(ecx_val))
+                return -1;
+            clock_settings((unsigned long *)ebx_val, (unsigned long *)ecx_val);
             break;
-        }
 
         case CURRENT_CLOCK:
             retval = current_clock();
             break;
 
-        case WAIT_CLOCK: {
-            unsigned long t;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(t)
-            );
-            wait_clock(t);
+        case WAIT_CLOCK:
+            wait_clock(ebx_val);
             break;
-        }
 
-        case WAITPID: {
-            int pid;
-            int *ret;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(pid), "=r"(ret)
-            );
-            retval = waitpid(pid, ret);
+        case WAITPID:
+            if (!isUserSpace(ecx_val))
+                return -1;
+            retval = waitpid(ebx_val, (int *)ecx_val);
             break;
-        }
 
-        case CONS_ECHO: {
-            int on;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                : "=r"(on)
-            );
-            cons_echo(on);
+        case CONS_ECHO:
+            cons_echo(ebx_val);
             break;
-        }
 
         case CONS_READ:
-            // cons_read()
+            // cons_read()  // Implémentation manquante
             break;
 
-        case CONS_WRITE: {
-            const char *str;
-            long size;
-            __asm__ __volatile__ (
-                "movl %%ebx, %0\n"
-                "movl %%ecx, %1\n"
-                : "=r"(str), "=r"(size)
-            );
-            cons_write(str, size);
+        case CONS_WRITE:
+            if (!isUserSpace(ebx_val))
+                return -1;
+            cons_write((const char *)ebx_val, ecx_val);
             break;
-        }
 
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
