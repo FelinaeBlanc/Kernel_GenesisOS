@@ -3,7 +3,7 @@
     .global getpid, console_putbytes, start, exit, kill,\
         getprio, chprio, pcount, pcreate, pdelete, preceive, preset,\
         psend, clock_settings, current_clock, wait_clock, waitpid,\
-        cons_echo, cons_read, cons_write, exit_kernel
+        cons_echo, cons_read, cons_write, exit_kernel, affiche_table_process
 
 # Définition des macros
 .macro save_registers
@@ -71,6 +71,12 @@ getprio:
     restore_registers
     ret
 
+affiche_table_process:
+    save_registers
+    movl $PS, %eax
+    int $49
+    restore_registers
+    ret
 
 chprio:
     save_registers
@@ -174,3 +180,4 @@ exit_kernel:
     int $49
     restore_registers
     ret
+

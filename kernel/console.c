@@ -138,6 +138,7 @@ void traite_car(char c, uint8_t ct) {
 }
 
 
+
 /*
  * This is the function called by printf to send its output to the screen. You
  * have to implement it in the kernel and in the user program.
@@ -171,7 +172,6 @@ int cons_read(char *string, unsigned long length) {
         ordonnanceur();
     }
 
-    printf("ptampon : %d\n", ptampon);
     // Lecture des données depuis le tampon
     read = false;
     int i = 0;

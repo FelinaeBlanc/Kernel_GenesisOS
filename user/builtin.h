@@ -6,6 +6,8 @@ extern void exit_kernel(void);
 extern void exit(int retval);
 extern int kill(int pid);
 
+void affiche_table_process();
+
 //extern char *mon_nom(void);
 extern int getpid(void);
 

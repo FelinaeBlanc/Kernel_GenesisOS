@@ -32,7 +32,9 @@ void cmd_test_run(int argc, char *argv[]) {
         return;
     }
     int num = atoi(argv[1]);
-    start(&proc_runner, 4000, 128, NULL, (void*)num);
+    int pid = start(&proc_runner, 4000, 128, NULL, (void*)num);
+    waitpid(pid, NULL);
+    printf("Test finished\n");
 }
 
 void cmd_test_until(int argc, char *argv[]) {
@@ -41,7 +43,9 @@ void cmd_test_until(int argc, char *argv[]) {
         return;
     }
     int num = atoi(argv[1]);
-    start(&proc_runner_until, 4000, 128, NULL, (void*)num);
+    int pid = start(&proc_runner_until, 4000, 128, NULL, (void*)num);
+    waitpid(pid, NULL);
+    printf("Test finished\n");
 }
 
 void cmd_exit(int argc, char *argv[]) {
@@ -59,25 +63,39 @@ void cmd_exit(int argc, char *argv[]) {
     exit(0);
 }
 
-void cmd_help(int argc, char *argv[]) {
+void cmd_uwu(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
+    const char* frame = "      /\\ ___ /\\ \n     =  u w u  =\n      /      \\\n";
+    printf("\n\n\n");
+    printf("MIAOW!!!\n DONNE MOI DES CROQUETTES!!!\n");
+    printf("%s", frame);
+
+    printf("Voulez-vous donner des croquettes a ce chat? (o/n)\n");
+    char c;
+    cons_read(&c, 1);
+    printf("\n");
+    if (c == 'o') {
+        printf("Merci pour les croquettes! MIAOW!!!\n");
+    } else {
+        printf("Miaow... :(\n");
+    }
+}
+
+void cmd_help(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+
     extern Command commands[];
     extern int num_commands;
     printf("Commandes disponibles :\n");
     for (int i = 0; i < num_commands; ++i) {
-        printf("-    %s: %s %s\n", commands[i].cmd, commands[i].canCrashKernel ? "[Dangereux]" : "[Sur]", commands[i].help);
+        printf("\n-    %s: %s %s\n", commands[i].cmd, commands[i].canCrashKernel ? "[Dangereux]" : "[Sur]", commands[i].help);
     }
 }
 
 void cmd_ps(int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
-    if (argc > 1 && strcmp(argv[1], "-a") == 0) {
-        printf("Liste de tous les processus (simulation)\n");
-    } else {
-        printf("Liste des processus (simulation)\n");
-    }
+    (void)argc;(void)argv;
+    affiche_table_process();
 }
 
 void parse_command(char *input, int *argc, char *argv[]) {
@@ -92,11 +110,11 @@ void parse_command(char *input, int *argc, char *argv[]) {
 
 Command commands[] = {
     {"test_run", cmd_test_run, "Lancer un test", true},
-    {"test_until", cmd_test_until, "Lancer un test jusqu a un certain nombre de ticks", true},
+    {"test_until", cmd_test_until, "Lancer un test ", true},
     {"ps", cmd_ps, "Lister les processus", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
+    {"uwu", cmd_uwu, "Miaow", false},
     {"help", cmd_help, "Afficher aide", false}
-    
 };
 
 int num_commands = sizeof(commands) / sizeof(commands[0]);
@@ -123,8 +141,9 @@ int superShell(void *arg) {
                     printf("Attention: cette commande peut planter le noyau. Continuer? (o/n)\n");
                     char c;
                     cons_read(&c, 1);
+                    printf("\n");
                     if (c != 'o') {
-                        printf("Commande annulée.\n");
+                        printf("Commande annulee.\n");
                         continue;
                     }
                 }
@@ -142,6 +161,7 @@ int superShell(void *arg) {
 
     return 0;
 }
+
 int c_runner(void){
   // printf("proc runner !\n");
   //test_until(20);
@@ -156,10 +176,17 @@ void printWelcomeMessage() {
     printf("*            Welcome to GenesisOS            *\n");
     printf("*                                            *\n");
     printf("**********************************************\n");
-    printf("*                                            *\n");
-    printf("*      Your journey to the stars begins!     *\n");
-    printf("*                                            *\n");
-    printf("**********************************************\n");
+    printf("  ,-.       _,---._ __  / \\\n");
+    printf(" /  )    .-'       `./ /   \\\n");
+    printf("(  (   ,'            `/    /|\n");
+    printf(" \\  `-\"             \\'\\   / |\n");
+    printf("  `.              ,  \\ \\ /  |\n");
+    printf("   /`.          ,'-`----Y   |\n");
+    printf("  (            ;        |   '\n");
+    printf("  |  ,-.    ,-'         |  /\n");
+    printf("  |  | (   |        uwu | /\n");
+    printf("  )  |  \\  `.___________|/\n");
+    printf("  `--'   `--'\n");
     printf("\n");
     printf("Kernel Version: 1.0.0\n");
     printf("\n");

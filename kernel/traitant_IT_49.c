@@ -113,6 +113,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
         case EXIT_KERNEL:
             exit_kernel();
             break;
+        case PS:
+            affiche_table_process();
+            break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
             break;

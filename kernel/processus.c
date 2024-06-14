@@ -26,7 +26,7 @@ Processus * ProcElu;
 void affiche_table_process(){
     for(int i=0; i<MAX_PROCESS; i++){
         if(tableDesProcs[i]!=NULL)
-        printf("processus %s pid = %i etat = %i\n", tableDesProcs[i]->nom, tableDesProcs[i]->pid, tableDesProcs[i]->etat);
+        printf("[PID %i] processus %s etat = %i\n", tableDesProcs[i]->pid, tableDesProcs[i]->nom, tableDesProcs[i]->etat);
     }
 }
 

@@ -77,6 +77,8 @@ extern Processus * ProcIdle;
 extern Processus * ProcElu;
 extern Processus * tableDesProcs[MAX_PROCESS];
 
+extern void affiche_table_process();
+
 /* Fonction control switch */
 extern void ctx_sw(int *, int *);
 extern void iret_func(void);
