@@ -5,6 +5,7 @@
 #include "test.h"
 #include "utils.h"
 #include "stdbool.h"
+#include "theme.h"
 
 #define CMD_SIZE 25
 
@@ -114,7 +115,8 @@ Command commands[] = {
     {"ps", cmd_ps, "Lister les processus", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"uwu", cmd_uwu, "Miaow", false},
-    {"help", cmd_help, "Afficher aide", false}
+    {"help", cmd_help, "Afficher aide", false},
+    {"theme", cmd_theme, "Theme Happy Birthday too you", false},
 };
 
 int num_commands = sizeof(commands) / sizeof(commands[0]);

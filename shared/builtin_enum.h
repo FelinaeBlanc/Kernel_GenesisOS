@@ -33,5 +33,6 @@
 #define TRY_WAIT 28
 #define WAIT 29
 
+#define PLAY_SOUND 30
 
 #endif

@@ -5,7 +5,7 @@
 #include "processus.h"
 
 // Fonction pour émettre un bip
-void play_sound(unsigned int frequency) {
+void play_sound(unsigned int frequency, int t) {
     unsigned int divisor = 1193180 / frequency;
     outb(0xB6, 0x43); // Commande pour configurer le PIT channel 2
     outb((uint8_t)(divisor & 0xFF), 0x42); // LSB
@@ -16,6 +16,8 @@ void play_sound(unsigned int frequency) {
     if (tmp != (tmp | 3)) {
         outb(tmp | 3, 0x61);
     }
+
+    duration = current_clock() + t;
 }
 
 // Arrête le BIP
@@ -24,12 +26,7 @@ void nosound() {
  	outb(tmp, 0x61);
 }
 
-void set_duration(int t){
-    duration = current_clock() + t;
-}
-
 void beep() {
-    play_sound(500); // Fréquence du son (en Hz)
-    set_duration(10);
+    play_sound(500,10); // Fréquence du son (en Hz)
 }
 

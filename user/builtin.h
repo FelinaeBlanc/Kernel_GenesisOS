@@ -60,5 +60,6 @@ extern int signaln(int sid, short int count);
 extern int try_wait(int sid);
 extern int wait(int sid);
 
+extern void play_sound(unsigned int frequency, int t);
 
 #endif

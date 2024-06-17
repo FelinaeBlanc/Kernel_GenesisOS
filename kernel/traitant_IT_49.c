@@ -4,6 +4,7 @@
 #include "semaphore.h"
 #include "horloge.h"
 #include "console.h"
+#include "sound.h"
 
 /******** Protections ********/
 bool isUserSpace(int addr){
@@ -140,6 +141,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
             break;
         case WAIT:
             retval = wait(ebx_val);
+            break;
+        case PLAY_SOUND:
+            play_sound(ebx_val, ecx_val);
             break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE

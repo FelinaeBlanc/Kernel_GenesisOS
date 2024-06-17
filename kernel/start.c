@@ -4,7 +4,6 @@
 #include "processus.h"
 #include "stdlib.h"
 #include "string.h"
-#include "horloge.h"
 
 int idle() {
     for (;;) {
@@ -19,12 +18,6 @@ void kernel_start(void)
     printf("\f");
 
     init_ordonnanceur();
-    //beep();
-    //printf("bipp???\n");
-    // // Init l'ordonnanceur
-
-    // Émettre un bip au démarrage
-    
 
     // Entrer dans la boucle idle
     idle();

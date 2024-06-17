@@ -4,7 +4,7 @@
         getprio, chprio, pcount, pcreate, pdelete, preceive, preset,\
         psend, clock_settings, current_clock, wait_clock, waitpid,\
         cons_echo, cons_read, cons_write, exit_kernel, affiche_table_process, set_color,\
-        scount, sdelete, sreset, signal, signaln, try_wait, wait
+        scount, sdelete, sreset, signal, signaln, try_wait, wait, play_sound
 
 # Définition des macros
 .macro save_registers
@@ -234,6 +234,13 @@ try_wait:
 wait:
     save_registers
     movl $WAIT, %eax
+    int $49
+    restore_registers
+    ret
+
+play_sound:
+    save_registers
+    movl $PLAY_SOUND, %eax
     int $49
     restore_registers
     ret
