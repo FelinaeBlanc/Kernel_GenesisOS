@@ -10,6 +10,7 @@
 #include "console.h"
 #include "stdbool.h"
 #include "files.h" // Pour les files (chprio)
+#include "semaphore.h" // Pour les sémaphores
 #include "traitant_IT_49.h"
 #include "traitant_IT_33.h"
 #include "segment.h"
@@ -343,6 +344,8 @@ void init_ordonnanceur(){
     }
     
     init_listes();
+    init_semaphores();
+
 
     // On initialise le processus Idle
     // start implicite de idle 

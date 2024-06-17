@@ -28,4 +28,6 @@ extern int signaln(int sid, short int count);
 extern int try_wait(int sid);
 extern int wait(int sid);
 
+extern void init_semaphores(void);
+
 #endif
