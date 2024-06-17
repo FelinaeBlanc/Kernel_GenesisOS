@@ -123,6 +123,7 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     proc->etat = ACTIVABLE;
     proc->secReveille = 0;
     proc->prio = prio;
+    proc->place = 0; // Variable dummy pour queue FIFO uniquement sans priorité
 
     proc->pileUser = pileUser;
     proc->pileKernel = pileKernel;
@@ -377,7 +378,7 @@ void wait_clock(unsigned long ticks){
     //affiche_table_process();
     Processus * procEndormi = ProcElu;
     procEndormi->etat = ENDORMI;
-    procEndormi->secReveille = current_clock()+ticks; // On ajoute le temps de réveil
+    procEndormi->secReveille = ticks; // On ajoute le temps de réveil
     queue_add(procEndormi, &proc_endormis, Processus, chainage, secReveille);
     // printf("Je m'endors %s %d %d\n", procEndormir->nom,procEndormir->etat,procEndormir->secReveille );
     ordonnanceur();
@@ -411,7 +412,7 @@ void verifie_reveille(unsigned long ticks) {
     }
 
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
-        ordonnanceur();
+        //ordonnanceur();
     }
 }
 

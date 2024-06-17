@@ -40,7 +40,8 @@ extern bool echo;
 
 extern void console_putbytes(const char *s, int len);
 
-extern void traite_car(char c, uint8_t ct );
+extern void set_color(int c);
+extern void traite_car(char c);
 /* Si on est nul, désactive l'écho sur la console, sinon le réactive. */
 extern void cons_echo(int on);
 

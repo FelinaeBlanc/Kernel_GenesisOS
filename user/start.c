@@ -196,9 +196,11 @@ void printWelcomeMessage() {
 
 
 void user_start(void) {
-  printWelcomeMessage(NULL);
-  //start(&proc_runner, 4000, 128, NULL, NULL);
-  start(&superShell, 4000, 2, "superShell", NULL);
+    set_color(JAUNE);
+    printWelcomeMessage(NULL);
+    set_color(BLANC);
+    //start(&proc_runner, 4000, 128, NULL, NULL);
+    start(&superShell, 4000, 2, "superShell", NULL);
 
   return;
 }

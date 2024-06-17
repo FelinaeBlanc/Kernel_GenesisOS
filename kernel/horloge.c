@@ -62,7 +62,7 @@ void tic_PIT(void) {
     // Ordonnancement !
     verifie_reveille(ticks); // Reveille les procs
 
-    if (cpt_ticks % SCHEDFREQ == 0) {
+    if (cpt_ticks % (CLOCKFREQ/SCHEDFREQ) == 0) {
         ordonnanceur();
     }
 }

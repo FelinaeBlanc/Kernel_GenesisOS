@@ -12,11 +12,11 @@ bool read=false;
 void keyboard_data(char *str) {
     int i = 0;
 
-    while (ptampon < BUFFER_SIZE && i < (int)strlen(str)) {
+    while (i < (int)strlen(str) && (ptampon < BUFFER_SIZE || str[i] == 127)) {
         char c = str[i];
 
         if (echo) {
-            traite_car(c, BLANC);
+            traite_car(c);
         }
 
         switch (c) {
@@ -47,6 +47,6 @@ void keyboard_data(char *str) {
 
     if (ptampon == BUFFER_SIZE) {
         verifie_es();
-        traite_car('\a', BLANC); // Sonnerie
+        traite_car('\a'); // Sonnerie
     }
 }

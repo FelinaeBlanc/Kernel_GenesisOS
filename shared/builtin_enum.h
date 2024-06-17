@@ -23,6 +23,15 @@
 #define CONS_READ 19
 #define CONS_WRITE 20
 #define EXIT_KERNEL 21
+#define SET_COLOR 22
+
+#define SCOUNT 23
+#define SDELETE 24
+#define SRESET 25
+#define SIGNAL 26
+#define SIGNALN 27
+#define TRY_WAIT 28
+#define WAIT 29
 
 
 #endif

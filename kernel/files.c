@@ -63,8 +63,7 @@ void add_msg(File * f, int message){
 
     Message * new_msg = mem_alloc(sizeof(Message));
     new_msg->message = message;
-    new_msg->place = 0; // (FIFO)
-    queue_add(new_msg, &f->queueMsg, Message, chainage, place);
+    queue_add(new_msg, &f->queueMsg, Message, chainage, place); // FIFO
 
 }
 
@@ -161,7 +160,7 @@ int pdelete(int fid){
     while ((proc = queue_out(&f->queueAttente, Processus, chainage)) != NULL){
         proc->etat = ACTIVABLE;
         proc->fid = -1;
-        proc->isOperationSuccess = false; // N'a pas réussis l'opération
+        proc->operationStatus = false; // N'a pas réussis l'opération
         queue_add(proc, &proc_activables, Processus, chainage, prio);
 
         if (proc->prio > procEluPrio){
@@ -208,7 +207,7 @@ int preset(int fid){
     while ((proc = queue_out(&f->queueAttente, Processus, chainage)) != NULL){
         proc->etat = ACTIVABLE;
         proc->fid = -1;
-        proc->isOperationSuccess = false; // N'a pas réussis l'opération
+        proc->operationStatus = false; // N'a pas réussis l'opération
         queue_add(proc, &proc_activables, Processus, chainage, prio);
 
         if (proc->prio > procEluPrio){
@@ -245,7 +244,7 @@ int psend(int fid, int message){
     int procEluPrio = ProcElu->prio;
     // Sauvegarde des valeurs
     ProcElu->fileValue = message; 
-    ProcElu->isOperationSuccess = true; // pour savoir si il a été débloqué par un pdelete ou preset
+    ProcElu->operationStatus = true; // pour savoir si il a été débloqué par un pdelete ou preset
 
     /*-Si la file est vide et que des processus sont bloqués en attente de message, 
     alors le processus le plus ancien dans la file parmi les plus prioritaires est 
@@ -254,7 +253,7 @@ int psend(int fid, int message){
         Processus * proc = retire_proc(f);
         proc->fid = -1;
         proc->fileValue = message;
-        proc->isOperationSuccess = true;
+        proc->operationStatus = true;
 
         proc->etat = ACTIVABLE;
         queue_add(proc, &proc_activables, Processus, chainage, prio);
@@ -270,7 +269,7 @@ int psend(int fid, int message){
         add_proc(f, ProcElu); // Ajoute le processus à la file d'attente
         ordonnanceur();
         // la file s'est libérée... On vérifie si l'opération a réussi
-        if (!ProcElu->isOperationSuccess){ // L'opération a échouer (pdelete ou preset a été appelé)
+        if (!ProcElu->operationStatus){ // L'opération a échouer (pdelete ou preset a été appelé)
             return -1;
         }
     } else {
@@ -317,7 +316,7 @@ int preceive(int fid,int *message){
     int procEluPrio = ProcElu->prio;
     // Sauvegarde des valeurs
     ProcElu->fileValue = -1; // Sera set par la suite 
-    ProcElu->isOperationSuccess = true; // pour savoir si il a été débloqué par un pdelete ou preset
+    ProcElu->operationStatus = true; // pour savoir si il a été débloqué par un pdelete ou preset
 
     if (getNbMsg(f) == 0){ // file vide
     /*
@@ -334,7 +333,7 @@ int preceive(int fid,int *message){
         Dans ce cas, la valeur de retour de preceive est strictement négative.
         */
         // L'opération a terminé... On vérifie si l'opération a réussi
-        if (!ProcElu->isOperationSuccess){ // L'opération a échouer (pdelete ou preset a été appelé)
+        if (!ProcElu->operationStatus){ // L'opération a échouer (pdelete ou preset a été appelé)
             return -1;
         }
 
@@ -361,7 +360,7 @@ int preceive(int fid,int *message){
             Processus * proc = retire_proc(f);
             proc->fid = -1;
             add_msg(f, proc->fileValue);
-            proc->isOperationSuccess = true;
+            proc->operationStatus = true;
 
             proc->etat = ACTIVABLE;
             queue_add(proc, &proc_activables, Processus, chainage, prio);

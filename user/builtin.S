@@ -3,7 +3,8 @@
     .global getpid, console_putbytes, start, exit, kill,\
         getprio, chprio, pcount, pcreate, pdelete, preceive, preset,\
         psend, clock_settings, current_clock, wait_clock, waitpid,\
-        cons_echo, cons_read, cons_write, exit_kernel, affiche_table_process
+        cons_echo, cons_read, cons_write, exit_kernel, affiche_table_process, set_color,\
+        scount, sdelete, sreset, signal, signaln, try_wait, wait
 
 # Définition des macros
 .macro save_registers
@@ -181,3 +182,58 @@ exit_kernel:
     restore_registers
     ret
 
+set_color:
+    save_registers
+    movl $SET_COLOR, %eax
+    int $49
+    restore_registers
+    ret
+
+scount:
+    save_registers
+    movl $SCOUNT, %eax
+    int $49
+    restore_registers
+    ret
+
+sdelete:
+    save_registers
+    movl $SDELETE, %eax
+    int $49
+    restore_registers
+    ret
+
+sreset:
+    save_registers
+    movl $SRESET, %eax
+    int $49
+    restore_registers
+    ret
+
+signal:
+    save_registers
+    movl $SIGNAL, %eax
+    int $49
+    restore_registers
+    ret
+
+signaln:
+    save_registers
+    movl $SIGNALN, %eax
+    int $49
+    restore_registers
+    ret
+
+try_wait:
+    save_registers
+    movl $TRY_WAIT, %eax
+    int $49
+    restore_registers
+    ret
+
+wait:
+    save_registers
+    movl $WAIT, %eax
+    int $49
+    restore_registers
+    ret

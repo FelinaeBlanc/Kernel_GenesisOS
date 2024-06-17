@@ -24,7 +24,7 @@
 // #define CANARY_VALUE_B (int32_t)0xCAFEBABE
 // #define CANARY_VALUE_C (int32_t)0xBEEFCAFE
 
-enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE, ATTEND_ES};
+enum Etat { ELU, ACTIVABLE, ENDORMI, MOURANT, ZOMBIE, ATTEND_FILS, ATTEND_FILE, ATTEND_SEMAPHORE, ATTEND_ES};
 //enum Prio { IDLE, COMMUN, PRIORITAIRE };
 
 typedef struct _PidLibre {
@@ -57,10 +57,12 @@ typedef struct _Processus {
     int retval;
     struct _Processus * pere;
 
-    // Files de messages
+    // Files de messages et Semaphore
     int fid;
     int fileValue;
-    bool isOperationSuccess;
+    int operationStatus;
+    int place; // Variable dummy pour queue FIFO uniquement sans priorité
+    
 } Processus;
 
 

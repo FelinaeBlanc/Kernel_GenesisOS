@@ -7,20 +7,27 @@
 #include "horloge.h"
 
 int idle() {
-  // printf("JE SUIS ENTREE DANS IDLE\n");
-  for (;;) {
-    sti(); // usage de sti et cli avant la phase 5 (possible après)
-    hlt(); // autre exception possible: le code de vos tests
-    cli(); // JAMAIS de sti ou de cli dans le reste de votre kernel
-  }
+    for (;;) {
+        sti(); // usage de sti et cli avant la phase 5 (possible après)
+        hlt(); // autre exception possible: le code de vos tests
+        cli(); // JAMAIS de sti ou de cli dans le reste de votre kernel
+    }
 }
 
 void kernel_start(void)
 {
-  printf("\f");
+    printf("\f");
 
-  init_ordonnanceur(); // Init l'ordonnanceur
-  idle();
-  
-  return;
+    init_ordonnanceur();
+    //beep();
+    //printf("bipp???\n");
+    // // Init l'ordonnanceur
+
+    // Émettre un bip au démarrage
+    
+
+    // Entrer dans la boucle idle
+    idle();
+    
+    return;
 }

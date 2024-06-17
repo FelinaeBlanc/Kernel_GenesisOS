@@ -1,12 +1,30 @@
 #ifndef BUILTIN_H
 #define BUILTIN_H
 
+#define NOIR 0x00
+#define BLEU 0x01
+#define VERT 0x02
+#define CYAN 0x03
+#define ROUGE 0x04
+#define MAGENTA 0x05
+#define MARRON 0x06
+#define GRIS_CLAIR 0x07
+#define GRIS_FONCE 0x08
+#define BLEU_CLAIR 0x09
+#define VERT_CLAIR 0x0A
+#define CYAN_CLAIR 0x0B
+#define ROUGE_CLAIR 0x0C
+#define MAGENTA_CLAIR 0x0D
+#define JAUNE 0x0E
+#define BLANC 0x0F
+
 extern int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name, void *arg);
 extern void exit_kernel(void);
 extern void exit(int retval);
 extern int kill(int pid);
 
-void affiche_table_process();
+extern void affiche_table_process();
+extern void set_color(int c);
 
 //extern char *mon_nom(void);
 extern int getpid(void);
@@ -32,5 +50,15 @@ extern int cons_read(char *, int);
 extern void cons_write(char *, int);
 
 extern void console_putbytes(const char *s, int len);
+
+/**semaphore**/
+extern int scount(int sid);
+extern int sdelete(int sid);
+extern int sreset(int sid, short int count);
+extern int signal(int sid);
+extern int signaln(int sid, short int count);
+extern int try_wait(int sid);
+extern int wait(int sid);
+
 
 #endif

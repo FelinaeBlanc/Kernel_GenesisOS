@@ -1,6 +1,7 @@
 #include "builtin_enum.h"
 #include "processus.h"
 #include "files.h"
+#include "semaphore.h"
 #include "horloge.h"
 #include "console.h"
 
@@ -115,6 +116,30 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
             break;
         case PS:
             affiche_table_process();
+            break;
+        case SET_COLOR:
+            set_color(ebx_val);
+            break;
+        case SCOUNT:
+            retval = scount(ebx_val);
+            break;
+        case SDELETE:
+            retval = sdelete(ebx_val);
+            break;
+        case SRESET:
+            retval = sreset(ebx_val, ecx_val);
+            break;
+        case SIGNAL:
+            retval = signal(ebx_val);
+            break;
+        case SIGNALN:
+            retval = signaln(ebx_val, ecx_val);
+            break;
+        case TRY_WAIT:
+            retval = try_wait(ebx_val);
+            break;
+        case WAIT:
+            retval = wait(ebx_val);
             break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE

@@ -8,10 +8,13 @@
 #include "kbd.h"
 #include "processus.h"
 #include "queue.h"
+#include "sound.h"
 
 uint16_t ligne, colonne;
-bool echo = true; 
+bool echo = true;
+int base_color = BLANC;
 
+/************Fonction écriture console**************/
 // revoie l'adresse mémoir de lig col
 uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 {
@@ -29,9 +32,13 @@ void ecrit_car(uint16_t lig, uint16_t col, uint8_t ct, uint8_t cf, uint8_t cl, c
     *p = value;
 }
 
+void set_color(int c){
+    base_color = c;
+}
+
 void efface_ecran(void){
 
-    for (uint32_t i=0; i<15; i++ ){
+    for (uint32_t i=0; i<HAUTEUR; i++ ){
         for (uint32_t j=0; j<LARGEUR; j++){
             ecrit_car(i, j, NOIR, NOIR, FALSE, ' ');
         }
@@ -53,17 +60,6 @@ void place_curseur(uint32_t lig, uint32_t col)
     colonne = col;
 }
 
-void generer_bip(void)
-{
-    // Générer un bip sonore en interagissant avec le matériel (haut-parleur du PC)
-    outb(0x61, inb(0x61) | 3); // Activer le haut-parleur
-    outb(0x43, 0xB6);          // Définir le mode
-    outb(0x42, 0xB0);          // Fréquence basse
-    outb(0x42, 0xB0);          // Fréquence haute
-    for (volatile int i = 0; i < 1000; i++); // Pause pour la durée du bip
-    outb(0x61, inb(0x61) & 0xFC); // Désactiver le haut-parleur
-}
-
 void defilement(void) {
     memmove(ptr_mem(0, 0), ptr_mem(1, 0), (HAUTEUR - 1) * LARGEUR * 2);
 
@@ -73,7 +69,7 @@ void defilement(void) {
     place_curseur((HAUTEUR - 1), 0);
 }
 
-void traite_car(char c, uint8_t ct) {
+void traite_car(char c) {
     uint32_t lig, col;
 
     switch (c)
@@ -105,21 +101,21 @@ void traite_car(char c, uint8_t ct) {
         place_curseur(ligne+1, 0);
         break;
     case 127: // DEL
-        if (colonne > 0) {
-            ecrit_car(ligne, colonne - 1, ct, NOIR, FALSE, ' ');
+        if (colonne > 2) {
+            ecrit_car(ligne, colonne - 1, NOIR, NOIR, FALSE, ' ');
             place_curseur(ligne, colonne - 1);
         }
         break;
     case '\a': // BEL 7
-        generer_bip();
+        beep();
         break;
     default:
         if(c<32){
-            traite_car(94, BLANC);
+            traite_car(94);
             c = 64 + c;
         }
         if (c <= 126 && c >= 32){
-            ecrit_car(ligne, colonne, ct, NOIR, FALSE, c);
+            ecrit_car(ligne, colonne, base_color, NOIR, FALSE, c);
             col = colonne +1;
             lig = ligne;
 
@@ -131,10 +127,11 @@ void traite_car(char c, uint8_t ct) {
         }
         break;
     }
+
     if (ligne == HAUTEUR - 1) {
         defilement();
         ligne--;
-}
+    }
 }
 
 
@@ -145,7 +142,7 @@ void traite_car(char c, uint8_t ct) {
  */
 void console_putbytes(const char *s, int len) {
     for (int i = 0; i < len; i++) {
-        traite_car(s[i], BLANC);
+        traite_car(s[i]);
     }
 }
 
@@ -157,7 +154,7 @@ void cons_echo(int on) {
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
 void cons_write(const char *str, long size) {
     for (long i = 0; i < size; i++) {
-        traite_car(str[i], BLANC);
+        traite_car(str[i]);
     }
 }
 
@@ -175,13 +172,12 @@ int cons_read(char *string, unsigned long length) {
     // Lecture des données depuis le tampon
     read = false;
     int i = 0;
-    while (i < (int)length || i < ptampon) {
+    while (i < (int)length && i < ptampon) {
         string[i] = tampon[i];
         i++;
     }
 
     int retval = i;
-
     // Décalage des données restantes dans le tampon
     if (i < ptampon) {
         memmove(tampon, tampon + i, ptampon - i);
