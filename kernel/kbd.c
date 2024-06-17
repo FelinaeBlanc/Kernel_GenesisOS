@@ -50,3 +50,8 @@ void keyboard_data(char *str) {
         traite_car('\a'); // Sonnerie
     }
 }
+
+void kbd_leds(unsigned char leds){
+    (void)leds;
+}
+

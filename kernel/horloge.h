@@ -12,7 +12,7 @@
 #define IT33 0xEE00
 #define IT49 0xEE00
 
-extern unsigned long ticks;
+extern unsigned long duration;
  
 void ecrit_car(uint16_t lig, uint16_t col, uint8_t ct, uint8_t cf, uint8_t cl, char c);
 

@@ -24,9 +24,12 @@ void nosound() {
  	outb(tmp, 0x61);
 }
 
+void set_duration(int t){
+    duration = current_clock() + t;
+}
+
 void beep() {
-    play_sound(700); // Fréquence du son (en Hz)
-    
-    nosound();
+    play_sound(500); // Fréquence du son (en Hz)
+    set_duration(10);
 }
 

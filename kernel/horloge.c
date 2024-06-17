@@ -9,7 +9,9 @@
 #include "horloge.h"
 #include "stdbool.h"
 #include "processus.h"
+#include "sound.h"
 
+unsigned long duration = 0;
 
 void ecrit_temps(char *s, int len){
 
@@ -57,6 +59,10 @@ void tic_PIT(void) {
         char timeString[LARGEUR];
         sprintf(timeString, "%02ld:%02ld:%02ld", heures, minutes, secondes);
         ecrit_temps(timeString, 8);
+    }
+    
+    if(duration != 0 && ticks == duration){
+        nosound();
     }
 
     // Ordonnancement !
