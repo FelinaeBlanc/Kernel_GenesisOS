@@ -53,6 +53,7 @@ extern void console_putbytes(const char *s, int len);
 
 /**semaphore**/
 extern int scount(int sid);
+extern int screate(short int count);
 extern int sdelete(int sid);
 extern int sreset(int sid, short int count);
 extern int signal(int sid);
@@ -61,5 +62,6 @@ extern int try_wait(int sid);
 extern int wait(int sid);
 
 extern void play_sound(unsigned int frequency, int t);
+extern void cons_switch_echo();
 
 #endif

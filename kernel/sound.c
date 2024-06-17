@@ -3,9 +3,16 @@
 #include "stdint.h"
 #include "cpu.h"
 #include "processus.h"
+#include "sound_enum.h"
 
 // Fonction pour émettre un bip
 void play_sound(unsigned int frequency, int t) {
+    duration = current_clock() + t;
+
+    if (frequency == REST) {
+        nosound();
+        return;
+    }
     unsigned int divisor = 1193180 / frequency;
     outb(0xB6, 0x43); // Commande pour configurer le PIT channel 2
     outb((uint8_t)(divisor & 0xFF), 0x42); // LSB
@@ -16,8 +23,6 @@ void play_sound(unsigned int frequency, int t) {
     if (tmp != (tmp | 3)) {
         outb(tmp | 3, 0x61);
     }
-
-    duration = current_clock() + t;
 }
 
 // Arrête le BIP
@@ -27,6 +32,6 @@ void nosound() {
 }
 
 void beep() {
-    play_sound(500,10); // Fréquence du son (en Hz)
+    play_sound(500,5); // Fréquence du son (en Hz)
 }
 

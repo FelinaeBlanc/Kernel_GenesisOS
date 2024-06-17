@@ -26,13 +26,15 @@
 #define SET_COLOR 22
 
 #define SCOUNT 23
-#define SDELETE 24
-#define SRESET 25
-#define SIGNAL 26
-#define SIGNALN 27
-#define TRY_WAIT 28
-#define WAIT 29
+#define SCREATE 24
+#define SDELETE 25
+#define SRESET 26
+#define SIGNAL 27
+#define SIGNALN 28
+#define TRY_WAIT 29
+#define WAIT 30
 
-#define PLAY_SOUND 30
+#define PLAY_SOUND 31
+#define CONS_SWITCH_ECHO 32
 
 #endif

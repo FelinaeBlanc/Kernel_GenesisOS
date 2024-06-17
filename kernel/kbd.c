@@ -24,6 +24,9 @@ void keyboard_data(char *str) {
                 if (ptampon > 0) {
                     ptampon--;
                 }
+                else {
+                    traite_car('\a');
+                }
                 break;
             case '\t':
             case '\n':

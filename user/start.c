@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "stdbool.h"
 #include "theme.h"
+#include "test_semaphore.h"
 
 #define CMD_SIZE 25
 
@@ -94,6 +95,17 @@ void cmd_help(int argc, char *argv[]) {
     }
 }
 
+void cmd_clear(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    printf("\f");
+}
+
+void cmd_echo(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    cons_switch_echo();
+    printf("\n");
+}
+
 void cmd_ps(int argc, char *argv[]) {
     (void)argc;(void)argv;
     affiche_table_process();
@@ -111,12 +123,15 @@ void parse_command(char *input, int *argc, char *argv[]) {
 
 Command commands[] = {
     {"test_run", cmd_test_run, "Lancer un test", true},
-    {"test_until", cmd_test_until, "Lancer un test ", true},
+    {"test_until", cmd_test_until, "Lancer un test", true},
+    {"test_semaphore", cmd_test_semaphore, "Lancer le test des semaphores", true},
     {"ps", cmd_ps, "Lister les processus", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"uwu", cmd_uwu, "Miaow", false},
+    {"theme", cmd_theme, "Jouer une misque ! entre 1 et 5.", false},
+    {"clear", cmd_clear, "Efface le terminal", false},
+    {"echo", cmd_echo, "Change le mode d'affichage", false},
     {"help", cmd_help, "Afficher aide", false},
-    {"theme", cmd_theme, "Theme Happy Birthday too you", false},
 };
 
 int num_commands = sizeof(commands) / sizeof(commands[0]);
@@ -201,8 +216,7 @@ void user_start(void) {
     set_color(JAUNE);
     printWelcomeMessage(NULL);
     set_color(BLANC);
-    //start(&proc_runner, 4000, 128, NULL, NULL);
-    start(&superShell, 4000, 2, "superShell", NULL);
 
-  return;
+    start(&superShell, 4000, 2, "SuperShell", NULL);
+    return;
 }

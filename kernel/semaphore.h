@@ -21,6 +21,7 @@ typedef struct  _Semaphore {
 extern Semaphore * tableauSem[NBSEM];
 
 extern int scount(int sid);
+extern int screate(short int count);
 extern int sdelete(int sid);
 extern int sreset(int sid, short int count);
 extern int signal(int sid);

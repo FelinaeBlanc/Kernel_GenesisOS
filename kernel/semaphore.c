@@ -146,6 +146,7 @@ int signal(int sid){
 
     Semaphore * sem = tableauSem[sid];
     // Vérifie dépassement de capacité
+
     if (sem->count > SHORTINT_MAX - 1){ return -2; }
     sem->count++;
 
@@ -155,6 +156,7 @@ int signal(int sid){
         proc->operationStatus = true;
         queue_add(proc, &proc_activables, Processus, chainage, prio);
     }
+    
 
     return 0;
 
@@ -202,7 +204,7 @@ int try_wait(int sid){
     if (sem->count <= 0){ // Vérifie si le sémaphore est bloqué
         return -3;
     }
-
+    // sem->count > 0 !
     sem->count--;
 
     return 0;
@@ -227,7 +229,7 @@ int wait(int sid){
     if (sem->count < SHORTINT_MIN + 1){ return -2; }
     sem->count--;
 
-    if (sem->count <= 0){
+    if (sem->count < 0){
         ProcElu->etat = ATTEND_SEMAPHORE;
         queue_add(ProcElu, &sem->queueAttente, Processus, chainage, place);
         ordonnanceur();
@@ -237,6 +239,7 @@ int wait(int sid){
             return operationStatus;
         }
     }
+    
     
     return 0;
 

@@ -124,6 +124,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
         case SCOUNT:
             retval = scount(ebx_val);
             break;
+        case SCREATE:
+            retval = screate(ebx_val);
+            break;
         case SDELETE:
             retval = sdelete(ebx_val);
             break;
@@ -144,6 +147,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
             break;
         case PLAY_SOUND:
             play_sound(ebx_val, ecx_val);
+            break;
+        case CONS_SWITCH_ECHO:
+            cons_switch_echo();
             break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE

@@ -98,7 +98,7 @@ void traite_car(char c) {
         place_curseur(0,0);
         break;
     case '\r': // CR 13
-        place_curseur(ligne+1, 0);
+        place_curseur(ligne, 0);
         break;
     case 127: // DEL
         if (colonne > 2) {
@@ -151,6 +151,10 @@ void cons_echo(int on) {
     echo = on ? true : false;
 }
 
+void cons_switch_echo(){
+    echo = (!echo);
+}
+
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
 void cons_write(const char *str, long size) {
     for (long i = 0; i < size; i++) {
@@ -170,6 +174,7 @@ int cons_read(char *string, unsigned long length) {
     }
 
     // Lecture des données depuis le tampon
+    memset(string, 0, length); // on vide string avant de commencer
     read = false;
     int i = 0;
     while (i < (int)length && i < ptampon) {
