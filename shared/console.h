@@ -54,6 +54,7 @@ extern void traite_car(char c);
 /* Si on est nul, désactive l'écho sur la console, sinon le réactive. */
 extern void cons_echo(int on);
 extern void cons_switch_echo();
+extern void afficher_historique();
 
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
 extern void cons_write(const char *str, long size);

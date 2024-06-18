@@ -2,7 +2,7 @@
 .text
     .global getpid, console_putbytes, start, exit, kill,\
         getprio, chprio, pcount, pcreate, pdelete, preceive, preset,\
-        psend, clock_settings, current_clock, wait_clock, waitpid,\
+        psend, clock_settings, current_clock, wait_clock, waitpid, afficher_historique,\
         cons_echo, cons_read, cons_write, exit_kernel, affiche_table_process, set_color, set_id_start,\
         scount, screate, sdelete, sreset, signal, signaln, try_wait, wait, play_sound, cons_switch_echo
 
@@ -261,6 +261,13 @@ cons_switch_echo:
 set_id_start:
     save_registers
     movl $SET_ID_START, %eax
+    int $49
+    restore_registers
+    ret
+
+afficher_historique:
+    save_registers
+    movl $ECHO_HIST, %eax
     int $49
     restore_registers
     ret
