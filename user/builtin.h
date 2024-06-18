@@ -25,6 +25,7 @@ extern int kill(int pid);
 
 extern void affiche_table_process();
 extern void set_color(int c);
+extern void set_id_start(int i);
 
 //extern char *mon_nom(void);
 extern int getpid(void);

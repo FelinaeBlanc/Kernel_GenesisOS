@@ -9,10 +9,14 @@
 #include "processus.h"
 #include "queue.h"
 #include "sound.h"
+#include "mem.h"
 
 uint16_t ligne, colonne;
 bool echo = true;
 int base_color = BLANC;
+int id_col_satrt = 0;
+char * history[HISTORY_SIZE];
+int index_history = 0;
 
 /************Fonction écriture console**************/
 // revoie l'adresse mémoir de lig col
@@ -21,6 +25,10 @@ uint16_t *ptr_mem(uint32_t lig, uint32_t col)
     return (uint16_t*)(DEBUT_MEM + 2 * (lig * LARGEUR + col)) ;
 }
 
+void set_id_start(int i) {
+    if (i<0 || i>LARGEUR) return;
+    id_col_satrt = i;
+}
 
 // écrit le caratère c, a lig col, de couleur cl, fond cf
 void ecrit_car(uint16_t lig, uint16_t col, uint8_t ct, uint8_t cf, uint8_t cl, char c) {
@@ -60,6 +68,22 @@ void place_curseur(uint32_t lig, uint32_t col)
     colonne = col;
 }
 
+void efface_ligne(void){
+    for (uint32_t j=id_col_satrt; j<LARGEUR; j++){
+        ecrit_car(ligne, j, NOIR, NOIR, FALSE, ' ');
+    }
+    place_curseur(ligne, id_col_satrt);
+}
+
+void avance_curseur(void){
+    int col = colonne +1;
+    int lig = ligne;
+
+    if (col% LARGEUR == 0) return;
+    
+    place_curseur(lig, col);
+}
+
 void defilement(void) {
     memmove(ptr_mem(0, 0), ptr_mem(1, 0), (HAUTEUR - 1) * LARGEUR * 2);
 
@@ -75,10 +99,10 @@ void traite_car(char c) {
     switch (c)
     {
     case '\b': // BS 8
-        if (colonne >0) { 
+        if (colonne > id_col_satrt) { 
             place_curseur(ligne, colonne-1);
         } else {
-            place_curseur(ligne, 0);
+            place_curseur(ligne, id_col_satrt);
         }
         break;
     case '\t': // HT 9
@@ -98,7 +122,9 @@ void traite_car(char c) {
         place_curseur(0,0);
         break;
     case '\r': // CR 13
-        place_curseur(ligne, 0);
+        place_curseur(ligne, id_col_satrt);
+        break;
+    case '\x1b': // si c'est une flèche on écrit rien
         break;
     case 127: // DEL
         if (colonne > 2) {
@@ -181,6 +207,22 @@ int cons_read(char *string, unsigned long length) {
         string[i] = tampon[i];
         i++;
     }
+
+    // Gestion de l'historique des commandes
+    if (index_history == HISTORY_SIZE) {
+        // Libérer la mémoire de la commande la plus ancienne
+        mem_free(history[0], strlen(history[0])+1);
+        // Décaler les entrées restantes vers le début
+        for (int j = 1; j < HISTORY_SIZE; j++) {
+            history[j - 1] = history[j];
+        }
+        index_history--;
+    }
+
+    // Allocation de mémoire pour la nouvelle commande
+    history[index_history] = (char *)mem_alloc(strlen(string) + 1);
+    strcpy(history[index_history], string);
+    index_history++;
 
     int retval = i;
     // Décalage des données restantes dans le tampon

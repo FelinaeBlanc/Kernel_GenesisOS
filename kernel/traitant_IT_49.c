@@ -151,6 +151,9 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
         case CONS_SWITCH_ECHO:
             cons_switch_echo();
             break;
+        case SET_ID_START:
+            set_id_start(ebx_val);
+            break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
             break;

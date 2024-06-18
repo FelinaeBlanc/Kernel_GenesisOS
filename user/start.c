@@ -216,7 +216,8 @@ void user_start(void) {
     set_color(JAUNE);
     printWelcomeMessage(NULL);
     set_color(BLANC);
-
+    set_id_start(2);
+    // start(&proc_runner, 4000, 128, NULL, (void*)(9));
     start(&superShell, 4000, 2, "SuperShell", NULL);
     return;
 }
