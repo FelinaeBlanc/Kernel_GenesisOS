@@ -16,6 +16,9 @@ int idle() {
 void kernel_start(void)
 {
     printf("\f");
+    //srand(784566);
+    //printf("RDM: %d %d %d %d %d %d\n", rand_int(), rand_int(), rand_int(), rand_int(), rand_int(), rand_int());
+    
 
     init_ordonnanceur();
 

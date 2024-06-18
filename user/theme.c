@@ -21,18 +21,56 @@ MelodyNote tetris_theme[] = {
     {C5, 150}, {B4, 300}, {B4, 150}, {C5, 150}, {D5, 300}, {E5, 300}, {C5, 300}, {A4, 300}, {A4, 300}
 };
 MelodyNote mario_theme[] = {
-    {E5, 150}, {E5, 150}, {REST, 100}, {E5, 150}, {REST, 100}, {C5, 150}, {E5, 150}, {REST, 100}, {G5, 300}, {REST, 100}, {G4, 300}, {REST, 100},
-    {C5, 150}, {REST, 100}, {G4, 300}, {REST, 100}, {E4, 300}, {REST, 100}, {A4, 150}, {REST, 100}, {B4, 150}, {Bb4, 150}, {A4, 150}, {REST, 100},
-    {G4, 150}, {E5, 150}, {G5, 150}, {A5, 150}, {REST, 100}, {F5, 150}, {G5, 150}, {REST, 100}, {E5, 150}, {REST, 100}, {C5, 150}, {D5, 150},
-    {B4, 150}, {REST, 100}, {C5, 150}, {REST, 100}, {G4, 300}, {REST, 100}, {E4, 300}, {REST, 100}, {A4, 150}, {REST, 100}, {B4, 150}, {Bb4, 150},
-    {A4, 150}, {REST, 100}, {G4, 150}, {E5, 150}, {G5, 150}, {A5, 150}, {REST, 100}, {F5, 150}, {G5, 150}, {REST, 100}, {E5, 150}, {REST, 100},
-    {C5, 150}, {D5, 150}, {B4, 150}, {REST, 100}, {REST, 100}, {C5, 150}, {REST, 100}, {C5, 150}, {REST, 100}, {C5, 150}, {REST, 100},
-    {G4, 150}, {REST, 100}, {G4, 150}, {REST, 100}, {G4, 150}, {REST, 100}, {E4, 150}, {REST, 100}, {A4, 150}, {REST, 100}, {B4, 150}, {Bb4, 150},
-    {A4, 150}, {REST, 100}, {G4, 150}, {E5, 150}, {G5, 150}, {A5, 150}, {REST, 100}, {F5, 150}, {G5, 150}, {REST, 100}, {E5, 150}, {REST, 100},
-    {C5, 150}, {D5, 150}, {B4, 150}, {REST, 100}, {REST, 100}, {C5, 150}, {REST, 100}, {C5, 150}, {REST, 100}, {C5, 150}, {REST, 100},
-    {G4, 150}, {REST, 100}, {G4, 150}, {REST, 100}, {G4, 150}, {REST, 100}, {E4, 150}, {REST, 100}, {A4, 150}, {REST, 100}, {B4, 150}, {Bb4, 150},
-    {A4, 150}, {REST, 100}, {G4, 150}, {E5, 150}, {G5, 150}, {A5, 150}, {REST, 100}, {F5, 150}, {G5, 150}, {REST, 100}, {E5, 150}, {REST, 100},
-    {C5, 150}, {D5, 150}, {B4, 150},{REST, 100}, {G4, 150}, {E4, 150}, {A4, 150}, {B4, 150}, {REST, 100}
+    {E7, 125}, {E7, 125}, {REST, 125}, {E7, 125},
+    {REST, 125}, {C7, 125}, {E7, 125}, {REST, 125},
+    {G7, 125}, {REST, 375}, {G6, 125}, {REST, 375},
+
+    {C7, 125}, {REST, 250}, {G6, 125}, {REST, 250},
+    {E6, 125}, {REST, 250}, {A6, 125}, {REST, 125},
+    {B6, 125}, {REST, 125}, {Bb6, 125}, {A6, 125},
+    {REST, 125}, {G6, 125}, {E7, 125}, {REST, 125},
+    {G7, 125}, {A7, 125}, {REST, 125}, {F7, 125},
+    {G7, 125}, {REST, 125}, {E7, 125}, {REST, 125},
+    {C7, 125}, {D7, 125}, {B6, 125}, {REST, 250},
+
+    {C7, 125}, {REST, 250}, {G6, 125}, {REST, 250},
+    {E6, 125}, {REST, 250}, {A6, 125}, {REST, 125},
+    {B6, 125}, {REST, 125}, {Bb6, 125}, {A6, 125},
+    {REST, 125}, {G6, 125}, {E7, 125}, {REST, 125},
+    {G7, 125}, {A7, 125}, {REST, 125}, {F7, 125},
+    {G7, 125}, {REST, 125}, {E7, 125}, {REST, 125},
+    {C7, 125}, {D7, 125}, {B6, 125}, {REST, 250},
+
+    {REST, 375}, {G7, 125}, {Fs7, 125}, {F7, 125},
+    {Ds7, 125}, {REST, 125}, {E7, 125}, {REST, 125},
+    {Gs6, 125}, {A6, 125}, {C7, 125}, {REST, 125},
+    {A6, 125}, {C7, 125}, {D7, 125},
+
+    {REST, 250}, {REST, 250}, {Ds7, 125}, {REST, 125},
+    {D7, 125}, {REST, 125}, {C7, 125}, {REST, 125},
+    {REST, 125}, {C6, 125}, {REST, 125}, {REST, 125},
+    {REST, 125}, {REST, 125}, {REST, 125},
+
+    {E6, 125}, {REST, 125}, {C6, 125}, {REST, 125},
+    {D6, 125}, {REST, 125}, {B5, 125}, {REST, 125},
+    {REST, 125}, {E6, 125}, {REST, 125}, {C6, 125},
+    {REST, 125}, {D6, 125}, {REST, 125}, {B5, 125},
+    {REST, 125}, {REST, 125}, {REST, 125},
+
+    {REST, 375}, {G7, 125}, {Fs7, 125}, {F7, 125},
+    {Ds7, 125}, {REST, 125}, {E7, 125}, {REST, 125},
+    {Gs6, 125}, {A6, 125}, {C7, 125}, {REST, 125},
+    {A6, 125}, {C7, 125}, {D7, 125},
+
+    {REST, 250}, {REST, 250}, {Ds7, 125}, {REST, 125},
+    {D7, 125}, {REST, 125}, {C7, 125}, {REST, 125},
+    {REST, 125}, {C6, 125}, {REST, 125}, {REST, 125},
+    {REST, 125}, {REST, 125}, {REST, 125},
+
+    {E6, 125}, {REST, 125}, {C6, 125}, {REST, 125},
+    {D6, 125}, {REST, 125}, {B5, 125}, {REST, 125},
+    {REST, 125}, {REST, 125}, {REST, 125}, {REST, 125},
+    {REST, 125}, {REST, 125}, {REST, 125}
 };
 MelodyNote castlevania_theme[] = {
     {E4, 150}, {G4, 150}, {A4, 150}, {G4, 150}, {E4, 150}, {G4, 150}, {A4, 150}, {G4, 150},
@@ -126,13 +164,48 @@ MelodyNote jai_du_bon_tabac[] = {
     {G4, 1000}
 };
 
+MelodyNote megalovania[] = {
+    {D5, 150}, {D5, 150}, {REST, 150}, {A4, 150}, {D5, 150}, {F5, 150}, {F5, 150}, {F5, 150}, 
+    {REST, 150}, {E5, 150}, {E5, 150}, {REST, 150}, {D5, 150}, {E5, 150}, {G5, 150}, {G5, 150}, 
+    {G5, 150}, {REST, 150}, {F5, 150}, {F5, 150}, {REST, 150}, {E5, 150}, {F5, 150}, {A5, 150}, 
+    {A5, 150}, {A5, 150}, {REST, 150}, {G5, 150}, {G5, 150}, {REST, 150}, {F5, 150}, {G5, 150}, 
+    {B5, 150}, {B5, 150}, {B5, 150}, {REST, 150}, {A5, 150}, {A5, 150}, {REST, 150}, {G5, 150}, 
+    {A5, 150}, {D6, 150}, {D6, 150}, {D6, 150}, {REST, 150}, {E6, 150}, {E6, 150}, {REST, 150}, 
+    {D6, 150}, {E6, 150}, {G6, 150}, {G6, 150}, {G6, 150}, {REST, 150}, {F6, 150}, {F6, 150}, 
+    {REST, 150}, {E6, 150}, {F6, 150}, {A6, 150}, {A6, 150}, {A6, 150}, {REST, 150}, {G6, 150}, 
+    {G6, 150}, {REST, 150}, {F6, 150}, {G6, 150}, {B6, 150}, {B6, 150}, {B6, 150}, {REST, 150}, 
+    {A6, 150}, {A6, 150}, {REST, 150}, {G6, 150}, {A6, 150}, {D7, 150}, {D7, 150}, {D7, 150}
+};
+
+MelodyNote marseillaise[] = {
+    {G4, 400}, {G4, 400}, {A4, 400}, {B4, 400}, {C5, 800},
+    {B4, 400}, {A4, 400}, {G4, 400}, {A4, 400}, {B4, 800},
+    {A4, 400}, {G4, 400}, {F4, 400}, {G4, 400}, {A4, 800},
+    {G4, 400}, {F4, 400}, {E4, 400}, {F4, 400}, {G4, 800},
+    {F4, 400}, {E4, 400}, {D4, 400}, {E4, 400}, {F4, 800},
+    {E4, 400}, {D4, 400}, {C4, 400}, {D4, 400}, {E4, 800},
+    {D4, 400}, {C4, 400}, {B3, 400}, {C4, 400}, {D4, 800},
+    {C4, 400}, {B3, 400}, {A3, 400}, {B3, 400}, {C4, 800}
+};
+
 void play_melody(MelodyNote* melody, int length) {
     for (int i = 0; i < length; i++) {
         play_sound(melody[i].note, melody[i].duration/10);
         wait_clock(current_clock() + melody[i].duration/10);
-      
     }
-    printf("Finit!\n");
+}
+
+int music_handler_loop(void* arg) {
+    Melody* melody = (Melody*)arg;  // Convertir le pointeur void* en Melody*
+    while (1) {
+        play_melody(melody->notes, melody->length);
+    }
+    return 0;
+}
+int music_handler_once(void* arg) {
+    Melody* melody = (Melody*)arg;  // Convertir le pointeur void* en Melody*
+    play_melody(melody->notes, melody->length);
+    return 0;
 }
 
 void cmd_theme(int argc, char *argv[]){
@@ -216,6 +289,23 @@ void cmd_theme(int argc, char *argv[]){
     case 11:
         set_color(ROUGE); printf("J'ai du bon tabac\n");
         play_melody(jai_du_bon_tabac, sizeof(jai_du_bon_tabac) / sizeof(MelodyNote));
+        break;
+    case 12:
+        set_color(BLEU_CLAIR); printf("MEGALOVANIA\n");
+        play_melody(megalovania, sizeof(megalovania) / sizeof(MelodyNote));
+        break;
+    case 13:
+        printf("La.... ");
+        set_color(BLEU); printf("Mars");
+        set_color(BLANC); printf("eill");
+        set_color(ROUGE); printf("aise  ");
+        
+        set_color(BLEU); printf("FRA");
+        set_color(BLANC); printf("NCA");
+        set_color(ROUGE); printf("ISE");
+        set_color(BLANC); printf("!!!!\n");
+
+        play_melody(marseillaise, sizeof(marseillaise) / sizeof(MelodyNote));
         break;
     default:
         printf("Melodie non reconnue\n");

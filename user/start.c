@@ -7,6 +7,9 @@
 #include "stdbool.h"
 #include "theme.h"
 #include "test_semaphore.h"
+#include "random.h"
+#include "more_less_game.h"
+#include "pendu.h"
 
 #define CMD_SIZE 25
 
@@ -90,8 +93,19 @@ void cmd_help(int argc, char *argv[]) {
     extern Command commands[];
     extern int num_commands;
     printf("Commandes disponibles :\n");
-    for (int i = 0; i < num_commands; ++i) {
-        printf("\n-    %s: %s %s\n", commands[i].cmd, commands[i].canCrashKernel ? "[Dangereux]" : "[Sur]", commands[i].help);
+    for (int i = 0; i < num_commands; ++i) 
+    {
+        set_color(MAGENTA_CLAIR);printf("  %s", commands[i].cmd);
+        set_color(BLANC);printf(": ");
+        if (commands[i].canCrashKernel){
+            set_color(ROUGE);
+            printf("[Dangereux] ");
+        } else {
+            set_color(VERT_CLAIR);
+            printf("[Sur] ");
+        }
+        set_color(BLANC);
+        printf("%s\n", commands[i].help);
     }
 }
 
@@ -111,10 +125,15 @@ void cmd_ps(int argc, char *argv[]) {
     affiche_table_process();
 }
 
+void cmd_rdm(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    printf("%d\n", rand_int());
+}
+
 void parse_command(char *input, int *argc, char *argv[]) {
     *argc = 0;
     char *token = strtok(input, " ");
-    while (token != NULL) {
+    while (token != NULL && (*token) != 0) {
         argv[(*argc)++] = token;
         token = strtok(NULL, " ");
     }
@@ -126,11 +145,14 @@ Command commands[] = {
     {"test_until", cmd_test_until, "Lancer un test", true},
     {"test_semaphore", cmd_test_semaphore, "Lancer le test des semaphores", true},
     {"ps", cmd_ps, "Lister les processus", false},
-    {"exit", cmd_exit, "Sortir du noyau", false},
     {"uwu", cmd_uwu, "Miaow", false},
-    {"theme", cmd_theme, "Jouer une misque ! entre 1 et 5.", false},
+    {"theme", cmd_theme, "Jouer une musique ! entre 1 et 13.", false},
     {"clear", cmd_clear, "Efface le terminal", false},
     {"echo", cmd_echo, "Change le mode d'affichage", false},
+    {"rdm", cmd_rdm, "Affiche un nombre aléatoire", false},
+    {"MoreLess", cmd_more_less_game, "Jouer au jeu du plus ou moins", false},
+    {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
+    {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
 };
 
@@ -148,7 +170,10 @@ int superShell(void *arg) {
         cons_read(str, CMD_SIZE);
         parse_command(str, &argc, argv);
 
-        if (argc == 0) continue;  // Pas de commande entrée
+        if (argc == 0){ 
+            printf("\n");
+            continue;  // Pas de commande entrée
+        }
 
         int found = 0;
         for (int i = 0; i < num_commands; ++i) {
@@ -164,6 +189,7 @@ int superShell(void *arg) {
                         continue;
                     }
                 }
+                printf("\n");
                 commands[i].func(argc, argv);
                 found = 1;
                 break;
@@ -216,7 +242,7 @@ void user_start(void) {
     set_color(JAUNE);
     printWelcomeMessage(NULL);
     set_color(BLANC);
-
-    start(&superShell, 4000, 2, "SuperShell", NULL);
+    srand(42);
+    start(&superShell, 40000, 2, "SuperShell", NULL);
     return;
 }

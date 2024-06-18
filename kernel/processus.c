@@ -293,7 +293,6 @@ void free_mourant_queue(){
 
 /***********Ordonnanceur*********/
 void ordonnanceur(void){
-
     free_mourant_queue();
     //free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
