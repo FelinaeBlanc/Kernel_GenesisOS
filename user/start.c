@@ -10,6 +10,8 @@
 #include "random.h"
 #include "more_less_game.h"
 #include "pendu.h"
+#include "piano.h"
+#include "theme_lib.h"
 
 #define CMD_SIZE 25
 
@@ -29,6 +31,77 @@ int proc_runner(void * arg){
     int num = (int)arg;
     test_run(num);
     return 0;
+}
+
+
+
+void printWelcomeMessageRose() {
+    printf("\f\n\n\n");
+    set_color(ROUGE);
+    printf("       :                       ..,,..    ...,,.. \n");
+    wait_clock(50);
+    printf("      ,%%,                .. ,#########::#########:, \n");
+    wait_clock(50);
+    printf("      :#%%%%,           ,,:',####%%%%%%%%%%%%##:`::%%%%%%%%####, \n");
+    wait_clock(50);
+    printf("     ,##%%%%%%%%,      ,##%%%% ,##%%%%%%:::::''%%' `::::%%%%####, \n");
+    wait_clock(50);
+    printf("     %%###%%%%;;,   ,###%%%%:,##%%%%:::''    '  . .`:::%%%%###, \n");
+    wait_clock(50);
+    printf("    :####%%%%;;:: ,##%%:' ,#%%::''   .,,,..    . .`::%%%%%%##, \n");
+    wait_clock(50);
+    printf("    %%####%%;;::,##%%:' ,##%%''  ,%%%%########%%     . `:::%%%%##, \n");
+    wait_clock(50);
+    printf("    ######:::,##%%:',####:  ,##%%%%:''     `%%%%,     .`::%%%%##, \n");
+    wait_clock(50);
+    printf("    :#####%%:'##%%:',#####' ,###%%' ,%%%%%%%%,%%%%,'%%,     . ::%%%%###,,.. \n");
+    wait_clock(50);
+    printf("     #####%%:,#%%:'#######  %%%%:'%%  %%'  `%%%% %%%% %%%%,.     '::%%%%#######, \n");
+    wait_clock(50);
+    printf("     `####%%,#%%:',####### ::' %%   ' ,%%%%%%%%%%%%, ::%%%%.    . '::%%%%###### \n");
+    wait_clock(50);
+    printf("      `###'##%%: ######## ,.   %%%%  %%%%,   ':: `:%%%%%%  :  . .:::%%%%###' \n");
+    wait_clock(50);
+    printf("      ,,::,###  %%%%%%%%%%### ::  %% %%%% '%%%%%%,.::: .:%%%%%%   #.  . ::%%%%%%#' \n");
+    wait_clock(50);
+    printf(",,,:::%%%%##:;#   `%%%%%%%%%%## :%% ,%%, %%   ':%%%%:'  #%%%%%%' ,.:##.  ::%%#' \n");
+    wait_clock(50);
+    printf("::%%%%#####%% %%%%:::  :::%%%%%% `%%%%,'%%%%     ..,,%%####' :%%# `::##, '' \n");
+    wait_clock(50);
+    printf("###%%%%::'###%%::: .   `:::, `::,,%%%%%%######%%%%'',::%%##' ,:::%%## \n");
+    wait_clock(50);
+    printf("''''   ,####%%:::. .  `::%%,     '':%%%%::' .,::%%%%%%#'   :::%%%%%%##, \n");
+    wait_clock(50);
+    printf("      :#%%%%'##%%:::.  . . \"%%::,,.. ..,,,,::%%%%%%###'  ,:%%%%%%%%####' \n");
+    wait_clock(50);
+    printf("     ,###%%%%'###%%:::: . . `::::::::::%%%%%%#####'   ,::%%####:' \n");
+    wait_clock(50);
+    printf("     %%###%%%%;'###%%::::.   .`::%%%%%%%%%%%%%%#####:'  ,,::%%%%##:' \n");
+    wait_clock(50);
+    printf("     ####%%;:;'####%%:::::.   `:%%######::'  ,,:::%%%%### \n");
+    wait_clock(50);
+    printf("     %%####;:;'######%%%%::::.           ,::::%%%%%%####' \n");
+    wait_clock(50);
+    printf("     `####%%;:'`#########%%%%:::....,,:::%%%%%%#######' \n");
+    wait_clock(50);
+    printf("        ;#####;;'..;;:::#########::%%%%#########:' \n");
+    wait_clock(50);
+    printf("                       ~~~~``````''''~~~ \n");
+    wait_clock(50);
+    set_color(BLANC);
+    printf("                       BIENVENUE GENESIS OS\n");
+    wait_clock(50);
+    printf("                 Type 'help' for a list of commands.\n");
+    play_melody(startrek_intro_melody,startrek_intro_nbNotes,startrek_intro_tempo);
+    
+
+    return;
+}
+
+
+void cmd_banner(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    printWelcomeMessageRose();
 }
 
 void cmd_test_run(int argc, char *argv[]) {
@@ -58,9 +131,10 @@ void cmd_exit(int argc, char *argv[]) {
     (void)argv;
 
     int cpt = 3;
+    unsigned long clock = current_clock();
     while (cpt > 0) {
         printf("Fermeture dans %d secondes\n", cpt);
-        wait_clock(100);
+        wait_clock(clock+100);
         cpt--;
     }
     printf("Sortie du noyau imminent...\n");
@@ -151,12 +225,14 @@ Command commands[] = {
     {"test_semaphore", cmd_test_semaphore, "Lancer le test des semaphores", true},
     {"ps", cmd_ps, "Lister les processus", false},
     {"uwu", cmd_uwu, "Miaow", false},
-    {"theme", cmd_theme, "Jouer une musique ! entre 1 et 13.", false},
+    {"theme", cmd_theme, "Jouer une musique ! entre 1 et 23.", false},
     {"clear", cmd_clear, "Efface le terminal", false},
     {"echo", cmd_echo, "Change le mode d'affichage", false},
     {"rdm", cmd_rdm, "Affiche un nombre aléatoire", false},
     {"MoreLess", cmd_more_less_game, "Jouer au jeu du plus ou moins", false},
     {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
+    {"piano", cmd_piano, "Joueur au piano", false},
+    {"banner", cmd_banner, "Afficher la bannière", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
     {"echo_hist", cmd_hist, "Affiche l'historique", false},
@@ -220,45 +296,12 @@ int c_runner(void){
 }
 
 
-void printWelcomeMessage() {
-    printf("\n\n\n");
-    set_color(ROUGE);
-    printf("       :                       ..,,..    ...,,.. \n");
-    printf("      ,%%,                .. ,#########::#########:, \n");
-    printf("      :#%%%%,           ,,:',####%%%%%%%%%%%%##:`::%%%%%%%%####, \n");
-    printf("     ,##%%%%%%%%,      ,##%%%% ,##%%%%%%:::::''%%' `::::%%%%####, \n");
-    printf("     %%###%%%%;;,   ,###%%%%:,##%%%%:::''    '  . .`:::%%%%###, \n");
-    printf("    :####%%%%;;:: ,##%%:' ,#%%::''   .,,,..    . .`::%%%%%%##, \n");
-    printf("    %%####%%;;::,##%%:' ,##%%''  ,%%%%########%%     . `:::%%%%##, \n");
-    printf("    ######:::,##%%:',####:  ,##%%%%:''     `%%%%,     .`::%%%%##, \n");
-    printf("    :#####%%:'##%%:',#####' ,###%%' ,%%%%%%%%,%%%%,'%%,     . ::%%%%###,,.. \n");
-    printf("     #####%%:,#%%:'#######  %%%%:'%%  %%'  `%%%% %%%% %%%%,.     '::%%%%#######, \n");
-    printf("     `####%%,#%%:',####### ::' %%   ' ,%%%%%%%%%%%%, ::%%%%.    . '::%%%%###### \n");
-    printf("      `###'##%%: ######## ,.   %%%%  %%%%,   ':: `:%%%%%%  :  . .:::%%%%###' \n");
-    printf("      ,,::,###  %%%%%%%%%%### ::  %% %%%% '%%%%%%,.::: .:%%%%%%   #.  . ::%%%%%%#' \n");
-    printf(",,,:::%%%%##:;#   `%%%%%%%%%%## :%% ,%%, %%   ':%%%%:'  #%%%%%%' ,.:##.  ::%%#' \n");
-    printf("::%%%%#####%% %%%%:::  :::%%%%%% `%%%%,'%%%%     ..,,%%####' :%%# `::##, '' \n");
-    printf("###%%%%::'###%%::: .   `:::, `::,,%%%%%%######%%%%'',::%%##' ,:::%%## \n");
-    printf("''''   ,####%%:::. .  `::%%,     '':%%%%::' .,::%%%%%%#'   :::%%%%%%##, \n");
-    printf("      :#%%%%'##%%:::.  . . \"%%::,,.. ..,,,,::%%%%%%###'  ,:%%%%%%%%####' \n");
-    printf("     ,###%%%%'###%%:::: . . `::::::::::%%%%%%#####'   ,::%%####:' \n");
-    printf("     %%###%%%%;'###%%::::.   .`::%%%%%%%%%%%%%%#####:'  ,,::%%%%##:' \n");
-    printf("     ####%%;:;'####%%:::::.   `:%%######::'  ,,:::%%%%### \n");
-    printf("     %%####;:;'######%%%%::::.           ,::::%%%%%%####' \n");
-    printf("     `####%%;:'`#########%%%%:::....,,:::%%%%%%#######' \n");
-    printf("        ;#####;;'..;;:::#########::%%%%#########:' \n");
-    printf("                       ~~~~``````''''~~~ \n");
-    set_color(BLANC);
-    printf("                       BIENVENUE GENESIS OS\n");
-    printf("                 Type 'help' for a list of commands.\n");
-    return;
-}
-
 
 
 void user_start(void) {
-    
-    printWelcomeMessage();
+    // startup melody
+    printWelcomeMessageRose();
+
     set_color(BLANC);
     srand(42);
     start(&superShell, 40000, 2, "SuperShell", NULL);

@@ -5,43 +5,24 @@
 #include "pendu.h"
 #include "utils.h"
 #include "theme.h"
-
-MelodyNote action_horror_music_notes[] = {
-    {C4, 150}, {E4, 150}, {G4, 150}, {A4, 150}, {REST, 50}, 
-    {A4, 150}, {G4, 150}, {E4, 150}, {C4, 150}, {REST, 50},
-    {E4, 100}, {REST, 50}, {E4, 100}, {REST, 50}, {F4, 100}, {REST, 50}, {F4, 100}, {REST, 50}, 
-    {G4, 100}, {REST, 50}, {G4, 100}, {REST, 50}, {A4, 100}, {REST, 50}, {A4, 100}, {REST, 50}, 
-    {B4, 100}, {REST, 50}, {C5, 100}, {REST, 50}, {D5, 100}, {REST, 50}, {E5, 100}, {REST, 50},
-    {C5, 150}, {G4, 150}, {E4, 150}, {C4, 150}, {REST, 50}, 
-    {D5, 150}, {A4, 150}, {F4, 150}, {D4, 150}, {REST, 50},
-    {E5, 200}, {REST, 100}, {E5, 200}, {REST, 100}, {D5, 200}, {REST, 100}, {D5, 200}, {REST, 100},
-    {C5, 200}, {REST, 100}, {C5, 200}, {REST, 100}, {B4, 200}, {REST, 100}, {B4, 200}, {REST, 100},
-    {A4, 200}, {REST, 100}, {A4, 200}, {REST, 100}, {G4, 200}, {REST, 100}, {G4, 200}, {REST, 100},
-    {F4, 200}, {REST, 100}, {F4, 200}, {REST, 100}, {E4, 200}, {REST, 100}, {E4, 200}, {REST, 100},
-    {D4, 200}, {REST, 100}, {D4, 200}, {REST, 100}, {C4, 200}, {REST, 100}, {C4, 200}, {REST, 100}
-};
-MelodyNote victory_horror_music_notes[] = {
-    {E4, 200}, {G4, 200}, {C5, 400},
-    {E5, 200}, {G5, 200}, {C6, 400},
-    {REST, 200},
-    {C5, 200}, {G4, 200}, {E4, 200}, {C4, 600}
-};
-MelodyNote defeat_horror_music_notes[] = {
-    {A3, 400}, {REST, 200}, {G3, 400}, {REST, 200}, 
-    {F3, 400}, {REST, 200}, {E3, 400}, {REST, 200},
-    {D3, 400}, {REST, 200}, {C3, 400}, {REST, 200},
-    {B2, 600}, {REST, 400}
-};
-
-
-Melody action_horror_music = { action_horror_music_notes, sizeof(action_horror_music_notes) / sizeof(MelodyNote) };
-Melody victory_horror_music = { victory_horror_music_notes, sizeof(victory_horror_music_notes) / sizeof(MelodyNote) };
-Melody defeat_horror_music = { defeat_horror_music_notes, sizeof(defeat_horror_music_notes) / sizeof(MelodyNote) };
+#include "theme_lib.h"
 
 // Dictionnaire de mots
 const char* dictionary[] = {
     "programmation", "ordinateur", "informatique", "developpement", "logiciel",
-    "materiel", "reseau", "internet", "base", "donnees", "memoire", "processeur"
+    "materiel", "reseau", "internet", "base", "donnees", "memoire", "processeur",
+    "lion", "elephant", "tigre", "girafe", "dauphin", "requin", "aigle", "serpent",
+    "pomme", "banane", "orange", "fraise", "chocolat", "fromage", "pain", "poulet",
+    "table", "chaise", "lampe", "tasse", "couteau", "ordinateur", "porte", "fenetre",
+    "physique", "chimie", "biologie", "mathematiques", "astronomie", "geologie",
+    "football", "basketball", "tennis", "natation", "escrime", "rugby", "boxe", "cyclisme",
+    "peinture", "sculpture", "musique", "danse", "theatre", "photographie", "cinema",
+    "plante", "jardin", "fleur", "arbre", "fruit", "legume", "herbe", "terre", "eau",
+    "soleil", "lune", "etoile", "planete", "galaxie", "univers", "comete", "meteore",
+    "chaussure", "pantalon", "chemise", "robe", "chapeau", "manteau", "echarpe",
+    "histoire", "geographie", "philosophie", "psychologie", "sociologie", "anthropologie",
+    "anglais", "francais", "espagnol", "allemand", "italien", "portugais", "chinois",
+    "chat", "chien", "oiseau", "poisson", "lapin", "hamster", "cheval", "mouton"
 };
 
 void choose_random_word(char* word) {
@@ -77,13 +58,6 @@ void cmd_pendu(int argc, char *argv[]) {
     char guessed_letters[26] = {0};
     int guessed_count = 0;
     int win = 0;
-
-    // start music!
-    int action_horror_music_pid = start(&music_handler_loop, 4000, getprio(getpid()), "music_handler", (void*)&action_horror_music);
-    if (action_horror_music_pid < 0) {
-        printf("Impossible de lancer la musique...\n");
-        return;
-    }
 
     printf("Bienvenue dans le jeu du pendu !\n");
 
@@ -136,16 +110,12 @@ void cmd_pendu(int argc, char *argv[]) {
         }
     }
 
-    // Arrêter la musique d'action
-    if (action_horror_music_pid >= 0) {
-        kill(action_horror_music_pid);
-    }
 
     if (win) {
         printf("Felicitations ! Vous avez trouve le mot : %s\n", word);
-        start(&music_handler_once, 4000, getprio(getpid()), "music_handler", (void*)&victory_horror_music);
+        play_melody(victory_melody, victory_nbNotes, victory_tempo);
     } else {
         printf("Vous avez perdu ! Le mot etait : %s\n", word);
-        start(&music_handler_once, 4000, getprio(getpid()), "music_handler", (void*)&defeat_horror_music);
+        play_melody(defeat_melody, defeat_nbNotes, defeat_tempo);
     }
 }
