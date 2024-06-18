@@ -270,7 +270,7 @@ int cons_read(char *string, unsigned long length) {
 }
 
 void display_buff(){
-    for(uint16_t i = buff_display_ligne; i<=buff_ligne; i++){
+    for(uint16_t i = buff_display_ligne; i <= buff_ligne; i++){
         for (uint16_t j = 0; j < LARGEUR; j++)
         {
             ecrit_car_value(i-buff_display_ligne, j, screen_buffer[i][j]);
@@ -286,9 +286,10 @@ void defillement_haut(){
 }
 
 void defillement_bas() {
-    if (buff_display_ligne + HAUTEUR -1< buff_ligne) {
+    if (buff_display_ligne + HAUTEUR <= buff_ligne +1) {
         buff_display_ligne++;
         display_buff();
         place_curseur(HAUTEUR-1, id_col_start);
     }
+    efface_ligne();
 }
