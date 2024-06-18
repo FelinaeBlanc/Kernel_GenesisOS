@@ -11,13 +11,20 @@
 #include "sound.h"
 #include "mem.h"
 
+// variable pour l'affichage
 uint16_t ligne, colonne;
 bool echo = true;
 int base_color = BLANC;
-int id_col_satrt = 0;
+int id_col_start = 0;
+// variable pour l'historique
 char * history[HISTORY_SIZE];
 int index_history = 0;
 int current_idex_history = 0;
+
+// variable pour le scroll
+uint16_t screen_buffer[HAUTEUR*10][LARGEUR];
+uint16_t buff_ligne = 0;
+uint16_t buff_display_ligne = 0;
 
 /************Fonction écriture console**************/
 // revoie l'adresse mémoir de lig col
@@ -28,17 +35,25 @@ uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 
 void set_id_start(int i) {
     if (i<0 || i>LARGEUR) return;
-    id_col_satrt = i;
+    id_col_start = i;
+}
+
+uint16_t car_value(uint8_t ct, uint8_t cf, uint8_t cl, char c){
+    uint8_t char_value = c;
+    uint8_t attr_value = (cl << 7) | (cf << 4) | (ct);
+    uint16_t value = (attr_value << 8) | char_value;
+    return value;
 }
 
 // écrit le caratère c, a lig col, de couleur cl, fond cf
 void ecrit_car(uint16_t lig, uint16_t col, uint8_t ct, uint8_t cf, uint8_t cl, char c) {
     uint16_t *p = ptr_mem(lig, col);
-    *p = 0;
-    uint8_t char_value = c;
-    uint8_t attr_value = (cl << 7) | (cf << 4) | (ct);
-    uint16_t value = (attr_value << 8) | char_value;
-    *p = value;
+    *p = car_value(ct,cf,cl,c);
+}
+
+void ecrit_car_value(uint16_t lig, uint16_t col, uint16_t val){
+    uint16_t *p = ptr_mem(lig, col);
+    *p = val;
 }
 
 void set_color(int c){
@@ -46,13 +61,14 @@ void set_color(int c){
 }
 
 void efface_ecran(void){
-
     for (uint32_t i=0; i<HAUTEUR; i++ ){
         for (uint32_t j=0; j<LARGEUR; j++){
             ecrit_car(i, j, NOIR, NOIR, FALSE, ' ');
         }
     }
+    buff_display_ligne = buff_ligne;
 }
+
 
 void place_curseur(uint32_t lig, uint32_t col)
 {
@@ -70,10 +86,11 @@ void place_curseur(uint32_t lig, uint32_t col)
 }
 
 void efface_ligne(void){
-    for (uint32_t j=id_col_satrt; j<LARGEUR; j++){
+    for (uint32_t j=id_col_start; j<LARGEUR; j++){
         ecrit_car(ligne, j, NOIR, NOIR, FALSE, ' ');
+        screen_buffer[buff_ligne][j] = car_value(NOIR, NOIR, FALSE, ' ');
     }
-    place_curseur(ligne, id_col_satrt);
+    place_curseur(ligne, id_col_start);
 }
 
 void avance_curseur(void){
@@ -100,10 +117,10 @@ void traite_car(char c) {
     switch (c)
     {
     case '\b': // BS 8
-        if (colonne > id_col_satrt) { 
+        if (colonne > id_col_start) { 
             place_curseur(ligne, colonne-1);
         } else {
-            place_curseur(ligne, id_col_satrt);
+            place_curseur(ligne, id_col_start);
         }
         break;
     case '\t': // HT 9
@@ -112,24 +129,27 @@ void traite_car(char c) {
         lig = ligne;
         if (col < colonne) {
             lig = ligne +1;
+            buff_ligne++;
         } 
         place_curseur(lig, col);
         break;
     case '\n': // LF 10
         place_curseur((ligne+1)%HAUTEUR, 0);
+        buff_ligne++;
         break;
     case '\f':
         efface_ecran();
         place_curseur(0,0);
         break;
     case '\r': // CR 13
-        place_curseur(ligne, id_col_satrt);
+        place_curseur(ligne, id_col_start);
         break;
     case '\x1b': // si c'est une flèche on écrit rien
         break;
     case 127: // DEL
         if (colonne > 2) {
             ecrit_car(ligne, colonne - 1, NOIR, NOIR, FALSE, ' ');
+            screen_buffer[buff_ligne][colonne-1] = car_value(NOIR, NOIR, FALSE, ' ');
             place_curseur(ligne, colonne - 1);
         }
         break;
@@ -143,6 +163,7 @@ void traite_car(char c) {
         }
         if (c <= 126 && c >= 32){
             ecrit_car(ligne, colonne, base_color, NOIR, FALSE, c);
+            screen_buffer[buff_ligne][colonne] = car_value(base_color, NOIR, FALSE, c);
             col = colonne +1;
             lig = ligne;
 
@@ -157,6 +178,7 @@ void traite_car(char c) {
 
     if (ligne == HAUTEUR - 1) {
         defilement();
+        buff_display_ligne++;
         ligne--;
     }
 }
@@ -245,4 +267,29 @@ int cons_read(char *string, unsigned long length) {
     memset(tampon + ptampon, 0, BUFFER_SIZE );
 
     return retval;
+}
+
+void display_buff(){
+    for(uint16_t i = buff_display_ligne; i <= buff_ligne; i++){
+        for (uint16_t j = 0; j < LARGEUR; j++)
+        {
+            ecrit_car_value(i-buff_display_ligne, j, screen_buffer[i][j]);
+        }
+    }
+}
+
+void defillement_haut(){
+    if(buff_display_ligne > 0) {
+        buff_display_ligne--;
+        display_buff();
+    }
+}
+
+void defillement_bas() {
+    if (buff_display_ligne + HAUTEUR <= buff_ligne) {
+        buff_display_ligne++;
+        display_buff();
+        place_curseur(HAUTEUR-1, id_col_start);
+    }
+    efface_ligne();
 }
