@@ -35,9 +35,13 @@
 #define TRUE 0x01
 #define FALSE 0x00
 
-extern int id_col_satrt;
+extern int id_col_start;
 extern uint16_t ligne, colonne;
 extern bool echo;
+
+extern uint16_t screen_buffer[HAUTEUR*10][LARGEUR];
+extern uint16_t buff_ligne;
+extern uint16_t buff_display_ligne;
 
 #define HISTORY_SIZE 25
 extern char * history[HISTORY_SIZE];
@@ -61,5 +65,8 @@ extern void cons_write(const char *str, long size);
 
 /* Si length est nul, cette fonction retourne 0. Sinon, elle attend que l'utilisateur ait tapé une ligne complète */
 extern int cons_read(char *string, unsigned long length);
+
+extern void defillement_haut();
+extern void defillement_bas();
 
 #endif

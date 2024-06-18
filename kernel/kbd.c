@@ -21,6 +21,7 @@ void keyboard_data(char *str) {
 
         switch (c) {
             case '\x1b':
+                if(i >= (int)strlen(str) - 2) break;
                 if (str[i + 1] == '[' && str[i + 2] == 'A' && current_idex_history != 0){
                     strcpy(tampon, history[current_idex_history-1]);
                     ptampon = (int)strlen(history[current_idex_history-1]);
@@ -46,6 +47,14 @@ void keyboard_data(char *str) {
                 }
                 else if(str[i + 1] == '[' && str[i + 2] == 'C'){
                     avance_curseur();
+                }
+                else if(str[i + 1] == '[' && str[i + 2] == '5'){
+                    defillement_haut();
+                    i++;
+                }
+                else if(str[i + 1] == '[' && str[i + 2] == '6'){
+                    defillement_bas();
+                    i++;
                 }
                 i+=2;
             break;
