@@ -12,8 +12,6 @@ bool read=false;
 
 void keyboard_data(char *str) {
     int i = 0;
-    int idh = index_history;
-
     while (i < (int)strlen(str) && (ptampon < BUFFER_SIZE || str[i] == 127)) {
         char c = str[i];
 
@@ -23,18 +21,18 @@ void keyboard_data(char *str) {
 
         switch (c) {
             case '\x1b':
-                if (str[i + 1] == '[' && str[i + 2] == 'A' && idh != 0){
-                    strcpy(tampon, history[idh-1]);
-                    ptampon = (int)strlen(history[idh-1]);
-                    idh--;
+                if (str[i + 1] == '[' && str[i + 2] == 'A' && current_idex_history != 0){
+                    strcpy(tampon, history[current_idex_history-1]);
+                    ptampon = (int)strlen(history[current_idex_history-1]);
+                    current_idex_history--;
                     efface_ligne();
                     printf("%s", tampon);
                 }
                 else if(str[i + 1] == '[' && str[i + 2] == 'B'){
-                    if (index_history > idh) {
-                        idh++;
-                        strcpy(tampon, history[idh-1]);
-                        ptampon = (int)strlen(history[idh-1]);
+                    if (index_history > current_idex_history) {
+                        current_idex_history++;
+                        strcpy(tampon, history[current_idex_history-1]);
+                        ptampon = (int)strlen(history[current_idex_history-1]);
                         efface_ligne();
                         printf("%s", tampon);
                     }

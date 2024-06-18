@@ -35,13 +35,14 @@
 #define TRUE 0x01
 #define FALSE 0x00
 
+extern int id_col_satrt;
 extern uint16_t ligne, colonne;
 extern bool echo;
 
 #define HISTORY_SIZE 25
 extern char * history[HISTORY_SIZE];
 extern int index_history;
-extern int id_col_satrt;
+extern int current_idex_history;
 
 extern void console_putbytes(const char *s, int len);
 

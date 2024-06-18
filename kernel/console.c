@@ -17,6 +17,7 @@ int base_color = BLANC;
 int id_col_satrt = 0;
 char * history[HISTORY_SIZE];
 int index_history = 0;
+int current_idex_history = 0;
 
 /************Fonction écriture console**************/
 // revoie l'adresse mémoir de lig col
@@ -223,6 +224,7 @@ int cons_read(char *string, unsigned long length) {
     history[index_history] = (char *)mem_alloc(strlen(string) + 1);
     strcpy(history[index_history], string);
     index_history++;
+    current_idex_history=index_history;
 
     int retval = i;
     // Décalage des données restantes dans le tampon
