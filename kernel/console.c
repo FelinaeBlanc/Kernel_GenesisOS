@@ -286,7 +286,7 @@ void defillement_haut(){
 }
 
 void defillement_bas() {
-    if (buff_display_ligne + HAUTEUR <= buff_ligne +1) {
+    if (buff_display_ligne + HAUTEUR <= buff_ligne) {
         buff_display_ligne++;
         display_buff();
         place_curseur(HAUTEUR-1, id_col_start);
