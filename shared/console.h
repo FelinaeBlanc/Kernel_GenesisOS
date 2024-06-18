@@ -35,11 +35,20 @@
 #define TRUE 0x01
 #define FALSE 0x00
 
+extern int id_col_satrt;
 extern uint16_t ligne, colonne;
 extern bool echo;
 
+#define HISTORY_SIZE 25
+extern char * history[HISTORY_SIZE];
+extern int index_history;
+extern int current_idex_history;
+
 extern void console_putbytes(const char *s, int len);
 
+void set_id_start(int i);
+void efface_ligne(void);
+void avance_curseur(void);
 extern void set_color(int c);
 extern void traite_car(char c);
 /* Si on est nul, désactive l'écho sur la console, sinon le réactive. */

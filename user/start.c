@@ -161,6 +161,7 @@ int num_commands = sizeof(commands) / sizeof(commands[0]);
 int superShell(void *arg) {
     (void)arg; // Pour éviter l'avertissement sur le paramètre non utilisé
 
+    set_id_start(2);
     while (true) {
         char str[CMD_SIZE];
         char *argv[CMD_SIZE / 2 + 1];  // Pointeurs pour chaque argument

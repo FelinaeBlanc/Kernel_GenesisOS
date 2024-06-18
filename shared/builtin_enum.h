@@ -36,5 +36,6 @@
 
 #define PLAY_SOUND 31
 #define CONS_SWITCH_ECHO 32
+#define SET_ID_START 33
 
 #endif
