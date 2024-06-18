@@ -415,7 +415,7 @@ void verifie_reveille(unsigned long ticks) {
     }
 
     if (callOrdonnanceur){ // Si un processus de plus haute priorité a été ajouté
-        //ordonnanceur();
+        ordonnanceur();
     }
 }
 
