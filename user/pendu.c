@@ -92,12 +92,13 @@ void cmd_pendu(int argc, char *argv[]) {
         display_word(word, found);
         printf("Tentatives restantes : %d\n", tries_left);
         printf("Lettres deja proposees : %s\n", guessed_letters);
-        printf("Proposez une lettre : \n");
+        printf("Proposez une lettre : ");
 
         char buffer[2]; // Buffer to read one character plus the null terminator
         cons_read(buffer, 2);
         char guess = buffer[0];
-
+        printf("\n");
+    
         if (strchr(guessed_letters, guess)) {
             printf("Vous avez deja propose cette lettre.\n");
             continue;
