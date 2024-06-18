@@ -125,6 +125,11 @@ void cmd_ps(int argc, char *argv[]) {
     affiche_table_process();
 }
 
+void cmd_hist(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    afficher_historique();
+}
+
 void cmd_rdm(int argc, char *argv[]) {
     (void)argc;(void)argv;
     printf("%d\n", rand_int());
@@ -154,6 +159,7 @@ Command commands[] = {
     {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
+    {"echo_hist", cmd_hist, "Affiche l'historique", false},
 };
 
 int num_commands = sizeof(commands) / sizeof(commands[0]);

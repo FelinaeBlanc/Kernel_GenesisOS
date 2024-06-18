@@ -182,6 +182,12 @@ void cons_switch_echo(){
     echo = (!echo);
 }
 
+void afficher_historique(){
+    for(int i = 0; i<index_history; i++){
+        printf("%s\n", history[i]);
+    }
+}
+
 /* Envoie sur le terminal la suite de caractères de longueur size à l'adresse str. */
 void cons_write(const char *str, long size) {
     for (long i = 0; i < size; i++) {
