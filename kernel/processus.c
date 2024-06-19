@@ -26,8 +26,23 @@ Processus * ProcElu;
 /********Affichage********/
 void affiche_table_process(){
     for(int i=0; i<MAX_PROCESS; i++){
-        if(tableDesProcs[i]!=NULL)
-        printf("[PID %i] processus %s etat = %i\n", tableDesProcs[i]->pid, tableDesProcs[i]->nom, tableDesProcs[i]->etat);
+        if (tableDesProcs[i] == NULL){
+            continue;
+        }
+        printf("[PID ");
+        set_color(VERT);printf("%i",tableDesProcs[i]->pid);
+        set_color(BLANC);printf("] processus");
+        set_color(VERT);printf(" %s",tableDesProcs[i]->nom);
+        set_color(BLANC);printf(" [etat %i]",  tableDesProcs[i]->etat);
+        // le pid père
+        if(tableDesProcs[i]->pere!=NULL){
+            printf("  [Pere pid:");
+            set_color(VERT);printf("%i",tableDesProcs[i]->pere->pid);
+            set_color(BLANC);printf(" nom:");
+            set_color(VERT);printf("%s",tableDesProcs[i]->pere->nom);
+            set_color(BLANC);printf("]");
+        }
+        printf("\n");
     }
 }
 

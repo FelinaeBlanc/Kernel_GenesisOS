@@ -19,7 +19,6 @@ int play_melody_proc_once(void* arg){
     return 0;
 }
 
-
 void play_melody(const int melody[], int nbNotes, int tempo) {
 
     int wholenote = (60000 * 4) / tempo;
@@ -235,9 +234,14 @@ void cmd_theme(int argc, char *argv[]){
         if (pid_player < 0) {
             printf("Impossible de lancer la music...\n");
         } else {
-            waitpid(pid_player, NULL);
-            printf("Music terminée\n");
+            printf("Appuez sur n'importe quelle touche pour arreter la musique\n");
+            char input[2];
+            set_color(BLANC);
+            cons_read(input, 1);
+            printf("\n");
+        
             kill(pid_player);
+            waitpid(pid_player, NULL);
         }
     }
     printf("\n");

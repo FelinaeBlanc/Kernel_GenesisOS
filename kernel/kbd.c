@@ -5,6 +5,7 @@
 #include "console.h"
 #include "processus.h"
 #include "cpu.h"
+#include "sound.h"
 
 char tampon[BUFFER_SIZE];
 int ptampon = 0;
@@ -93,6 +94,13 @@ void keyboard_data(char *str) {
                 verifie_es();
 				break;
             default:
+                // if(c<32){
+                //     if(64 + c=='C'){ 
+                //         tampon[0] = '^';
+                //         tampon[1] = 'C';
+                //         ptampon = 2;
+                //     }
+                // }
                 if (c >= 32 && c <= 126) {
                     tampon[ptampon++] = c;
                     verifie_es();
