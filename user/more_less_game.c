@@ -40,7 +40,6 @@ void cmd_more_less_game(int argc, char *argv[]) {
         printf("Impossible de lancer la music...\n");
     }
 
-    srand(78 * current_clock() + 4562133);
     unsigned int answer = rand_int() % 1001;
     unsigned int try_left = 10;
     int win = 0;

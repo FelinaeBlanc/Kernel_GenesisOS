@@ -27,7 +27,6 @@ const char* dictionary[] = {
 
 void choose_random_word(char* word) {
     int word_count = sizeof(dictionary) / sizeof(dictionary[0]);
-    srand((unsigned int)current_clock());
     int random_index = rand_int() % word_count;
     strcpy(word, dictionary[random_index]);
 }

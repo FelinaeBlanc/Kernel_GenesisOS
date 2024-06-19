@@ -1,12 +1,8 @@
 #include "stdio.h"
-
+#include "builtin.h"
 unsigned int seed = 0;
 
-void srand(unsigned int newSeed){
-    seed = newSeed;
-}
-
 unsigned int rand_int(){
-    seed = seed * 1103515245 + 44523457;
-    return (unsigned int)(seed/65536) % 32768;
+    seed = ((seed + 4566) * current_clock() + 7891)%1000;
+    return seed;
 }

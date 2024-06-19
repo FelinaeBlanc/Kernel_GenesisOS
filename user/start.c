@@ -120,6 +120,7 @@ void cmd_test_until(int argc, char *argv[]) {
         printf("Utilisation: test_until <num>\n");
         return;
     }
+    printf("Starting test\n");
     int num = atoi(argv[1]);
     int pid = start(&proc_runner_until, 4000, 128, NULL, (void*)num);
     waitpid(pid, NULL);
@@ -338,7 +339,6 @@ void user_start(void) {
     printWelcomeMessageRose();
 
     set_color(BLANC);
-    srand(42);
 
     start(&superShell, 40000, 2, "SuperShell", NULL);
     return;
