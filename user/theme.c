@@ -64,8 +64,9 @@ void cmd_theme(int argc, char *argv[]){
     printf("09: Never gonna give you up\n");
     printf("10: Autres\n");
 
-    char input[2];
-    cons_read(input, 2);
+    char input[3];
+    cons_read(input, 3);
+    printf("\n");
     if (atoi(input) == 10){
         printf("11: Pink panther\n");
         printf("12: Prince Elgor\n");
@@ -81,16 +82,19 @@ void cmd_theme(int argc, char *argv[]){
         printf("22: Zelda Theme\n");
         printf("23: Doom\n");
         printf("24: Game Of Throne\n");
-        printf("25: Retour\n");
+        printf("25: Evangelion\n");
+        printf("26: Retour\n");
 
         printf("Entrez le numero de la musique que vous voulez jouer:\n");
         cons_read(input, 2);
         printf("\n");
     }
     int choice = atoi(input);
-    if (choice == 25){
+    printf("\n");
+    if (choice == 26){
         return;
     }
+
 
     set_color(VERT_CLAIR);
     printf("Playing... ");
@@ -213,6 +217,11 @@ void cmd_theme(int argc, char *argv[]){
         case 24: // Game Of Throne
             set_color(GRIS_CLAIR); printf("Game Of Throne\n");
             theme_music = get_gameofthrone();
+            ok = 1;
+            break;
+        case 25:
+            set_color(BLANC); printf("Evangelion\n");
+            theme_music = get_evangelion();
             ok = 1;
             break;
         default:

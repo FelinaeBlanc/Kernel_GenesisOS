@@ -1272,6 +1272,98 @@ const int defeat_melody[] = {
 int defeat_nbNotes = sizeof(defeat_melody) / sizeof(defeat_melody[0]) / 2;
 int defeat_tempo = 120;
 
+const int evangelion_melody[] = {
+    // intro
+    NOTE_C4, 2, NOTE_DS4, 2,
+    NOTE_F4, 4, NOTE_DS4, 2,
+    NOTE_F4, 4,
+    NOTE_F4, 2, NOTE_AS4, 4, NOTE_GS4, 4,
+    NOTE_G4, 4, NOTE_F4, 4, NOTE_G4, 2,
+    NOTE_G4, 2, NOTE_AS4, 2,
+    NOTE_C5, 4, NOTE_F4, 2, NOTE_DS4, 4,
+    NOTE_AS4, 4, NOTE_AS4, 4, NOTE_G4, 4, NOTE_AS4, 4,
+    NOTE_AS4, 2, NOTE_C5, -1,
+
+    // bridge
+    NOTE_C4, 4, NOTE_DS4, -8, NOTE_DS4, 16, NOTE_F4, -8, NOTE_DS4, -8, NOTE_F4, 8,
+    NOTE_F4, 8, NOTE_F4, 8, NOTE_AS4, 8, NOTE_GS4, 8, NOTE_G4, 16, NOTE_F4, 8, NOTE_G4, -8,
+    NOTE_G4, 4, NOTE_AS4, -8, NOTE_AS4, 16, NOTE_C5, -8, NOTE_F4, -8, NOTE_DS4, 8,
+    NOTE_AS4, 8, NOTE_AS4, 8, NOTE_G4, 8, NOTE_AS4, 8, NOTE_AS4, -8, NOTE_C5, 4, REST, 16,
+
+    // Verso 1
+    NOTE_DS5, 8, NOTE_AS4, 8, NOTE_AS4, 2, NOTE_AS4, 16,
+    NOTE_DS5, -8, NOTE_F5, -8, NOTE_AS4, 8, NOTE_AS4, -4, NOTE_AS4, 8,
+    NOTE_G5, -8, NOTE_GS5, -8, NOTE_G5, 8, NOTE_F5, -8, NOTE_DS5, -8,
+    NOTE_G5, -8, NOTE_GS5, -8, NOTE_G5, 8, NOTE_C5, -4, NOTE_C5, 16, NOTE_D5, 16,
+
+    // Compas 5
+    NOTE_DS5, -8, NOTE_DS5, -8, NOTE_D5, 8, NOTE_D5, -4, NOTE_DS5, 16, NOTE_F5, 16,
+    NOTE_GS5, -8, NOTE_G5, -8, NOTE_F5, 8, NOTE_DS5, -4, NOTE_G5, -8,
+    NOTE_G5, -8, NOTE_F5, -8, NOTE_E5, 8, NOTE_F5, 4, NOTE_C5, 4,
+
+    // Compas 8
+    NOTE_C5, -4, NOTE_D5, 8, NOTE_D5, -4, REST, 8,
+
+    // Verso 2
+    NOTE_DS5, 8, NOTE_AS4, 8, NOTE_AS4, 2, NOTE_AS4, 16,
+    NOTE_DS5, -8, NOTE_F5, -8, NOTE_AS4, 8, NOTE_AS4, -4, NOTE_AS4, 8,
+    NOTE_G5, -8, NOTE_GS5, -8, NOTE_G5, 8, NOTE_F5, -8, NOTE_DS5, -8,
+    NOTE_G5, -8, NOTE_GS5, -8, NOTE_G5, 8, NOTE_C5, -4, NOTE_C5, 16, NOTE_D5, 16,
+
+    // Compas 5
+    NOTE_DS5, -8, NOTE_DS5, -8, NOTE_D5, 8, NOTE_D5, -4, NOTE_DS5, 16, NOTE_F5, 16,
+    NOTE_GS5, -8, NOTE_G5, -8, NOTE_F5, 8, NOTE_DS5, -4, NOTE_G5, -8,
+
+    // Compas 7
+    NOTE_G5, -8, NOTE_F5, -8, NOTE_E5, 8, NOTE_F5, 4, NOTE_C5, 4,
+
+    // Compas 8
+    NOTE_C5, -4, NOTE_D5, 8, NOTE_D5, -4, REST, 8,
+
+    // Verso 3
+    NOTE_DS5, -8, NOTE_DS5, -8, NOTE_D5, 8, NOTE_D5, -4, NOTE_DS5, 16, NOTE_F5, 16,
+    NOTE_GS5, -8, NOTE_G5, -8, NOTE_F5, 8, NOTE_DS5, -4, NOTE_G5, -8,
+    NOTE_G5, -8, NOTE_F5, -8, NOTE_E5, 8, NOTE_F5, 4, NOTE_C5, 4,
+    NOTE_C5, -4, NOTE_D5, 8, NOTE_D5, -4, REST, 8,
+
+    // Chorus
+    NOTE_C5, 4, NOTE_DS5, 4, NOTE_F5, 8, NOTE_DS5, 4, NOTE_F5, 8,
+    NOTE_F5, 8, NOTE_F5, 8, NOTE_AS5, 8, NOTE_GS5, 8, NOTE_G5, 16, NOTE_F5, 8, NOTE_G5, -8,
+    NOTE_G5, 4, NOTE_AS5, 4, NOTE_C6, 8, NOTE_F5, 4, NOTE_DS5, 8,
+
+    NOTE_D5, 8, NOTE_D5, 8, NOTE_C5, 8, NOTE_D5, 8, NOTE_F5, 16, NOTE_DS5, 8, NOTE_DS5, -8, REST, 16,
+
+    NOTE_C5, 4, NOTE_DS5, 4, NOTE_F5, 8, NOTE_DS5, 4, NOTE_F5, 8,
+    NOTE_F5, 8, NOTE_F5, 8, NOTE_AS5, 8, NOTE_GS5, 8, NOTE_G5, 16, NOTE_F5, 8, NOTE_G5, -8,
+
+    NOTE_G5, 4, NOTE_AS5, 4, NOTE_C6, 8, NOTE_F5, 4, NOTE_DS5, 8,
+
+    NOTE_AS5, 8, NOTE_AS5, 8, NOTE_G5, 8, NOTE_AS5, 8, NOTE_AS5, -8, NOTE_C6, 4,
+
+    NOTE_C5, 4, NOTE_DS5, 4, NOTE_F5, 8, NOTE_DS5, 4, NOTE_F5, 8,
+    NOTE_F5, 8, NOTE_F5, 8, NOTE_AS5, 8, NOTE_GS5, 8, NOTE_G5, 16, NOTE_F5, 8, NOTE_G5, -8,
+
+    NOTE_G5, 4, NOTE_AS5, 4, NOTE_C6, 8, NOTE_F5, 4, NOTE_DS5, 8,
+
+    NOTE_AS5, 8, NOTE_AS5, 8, NOTE_G5, 8, NOTE_AS5, 8, NOTE_AS5, -8, NOTE_C6, 4,
+    NOTE_C5, 4, NOTE_DS5, 4, NOTE_F5, 8, NOTE_DS5, 4, NOTE_F5, 8,
+    NOTE_F5, 8, NOTE_F5, 8, NOTE_AS5, 8, NOTE_GS5, 8, NOTE_G5, 16, NOTE_F5, 8, NOTE_G5, -8,
+
+    NOTE_G5, 4, NOTE_AS5, 4, NOTE_C6, 8, NOTE_F5, 4, NOTE_DS5, 8,
+
+    NOTE_AS5, 8, NOTE_AS5, 8, NOTE_G5, 8, NOTE_AS5, 8, NOTE_AS5, -8, NOTE_C6, 4,
+
+    // Fin
+    NOTE_C6, 4, NOTE_DS6, 4, NOTE_F6, 8, NOTE_DS6, 4, NOTE_F6, 8,
+    NOTE_F6, 8, NOTE_F6, 8, NOTE_AS6, 8, NOTE_GS6, 8, NOTE_G6, 16, NOTE_F6, 8, NOTE_G6, -8,
+
+    NOTE_G6, 4, NOTE_AS6, 4, NOTE_C7, 8, NOTE_F6, 4, NOTE_DS6, 8,
+
+    NOTE_AS6, 8, NOTE_AS6, 8, NOTE_G6, 8, NOTE_AS6, 8, NOTE_AS6, -8, NOTE_C7, 4
+};
+int evangelion_nbNotes = sizeof(evangelion_melody) / sizeof(evangelion_melody[0]) / 2;
+int evangelion_tempo = 155;
+
 Theme get_bloodytears() {
     Theme theme = {bloodytears_melody, bloodytears_nbNotes, bloodytears_tempo};
     return theme;
@@ -1394,5 +1486,10 @@ Theme get_victory() {
 
 Theme get_defeat() {
     Theme theme = {defeat_melody, defeat_nbNotes, defeat_tempo};
+    return theme;
+}
+
+Theme get_evangelion() {
+    Theme theme = {evangelion_melody, evangelion_nbNotes, evangelion_tempo};
     return theme;
 }

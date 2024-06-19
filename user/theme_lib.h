@@ -28,5 +28,6 @@ Theme get_doom();
 Theme get_gameofthrone();
 Theme get_victory();
 Theme get_defeat();
+Theme get_evangelion();
 
 #endif

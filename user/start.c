@@ -207,6 +207,23 @@ void cmd_rdm(int argc, char *argv[]) {
     printf("%d\n", rand_int());
 }
 
+int idle_proc(void *arg) {
+    (void)arg;
+    while (1) {
+        wait_clock(current_clock()+200);
+    }
+    return 0;
+}
+void cmd_create_proc(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    int pid = start(&idle_proc, 4000, 20, "Dummy", (void*)0);
+    if (pid < 0) {
+        printf("Impossible de creer le processus\n");
+    } else {
+        printf("Processus cree avec pid %d\n", pid);
+    }
+}
+
 void cmd_kill(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Utilisation: kill <pid>\n");
@@ -218,6 +235,20 @@ void cmd_kill(int argc, char *argv[]) {
         printf("Impossible de tuer le processus %d\n", pid);
     } else {
         printf("Processus %d tue\n", pid);
+    }
+}
+void cmd_wait(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Utilisation: wait <pid>\n");
+        return;
+    }
+
+    int pid = atoi(argv[1]);
+    int status;
+    if (waitpid(pid, &status) == -1) {
+        printf("Impossible d'attendre le processus %d\n", pid);
+    } else {
+        printf("Processus %d termine avec status %d\n", pid, status);
     }
 }
 
@@ -245,7 +276,9 @@ Command commands[] = {
     {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
     {"piano", cmd_piano, "Joueur au piano", false},
     {"banner", cmd_banner, "Afficher la banniere", false},
+    {"create_proc", cmd_create_proc, "Creer un processus factice", false},
     {"kill", cmd_kill, "Tuer un processus", false},
+    {"wait", cmd_wait, "Attendre un processus", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
     {"echo_hist", cmd_hist, "Affiche l'historique", false},
