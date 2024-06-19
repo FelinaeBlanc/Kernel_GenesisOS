@@ -22,40 +22,56 @@ void keyboard_data(char *str) {
         switch (c) {
             case '\x1b':
                 if(i >= (int)strlen(str) - 2) break;
-                if (str[i + 1] == '[' && str[i + 2] == 'A' && current_idex_history != 0){
+                if(str[i+1]!='[') break;
+
+                switch (str[i+2])
+                {
+                case 'A':
+                    if(current_idex_history == 0) break; // si on a pas d'historique on skip
+
                     strcpy(tampon, history[current_idex_history-1]);
                     ptampon = (int)strlen(history[current_idex_history-1]);
                     current_idex_history--;
                     efface_ligne();
                     printf("%s", tampon);
-                }
-                else if(str[i + 1] == '[' && str[i + 2] == 'B'){
-                    if (index_history > current_idex_history) {
+                    break;
+                
+                case 'B':
+                    if (index_history > current_idex_history) { // si on est pas au bout de la liste
                         current_idex_history++;
                         strcpy(tampon, history[current_idex_history-1]);
                         ptampon = (int)strlen(history[current_idex_history-1]);
                         efface_ligne();
                         printf("%s", tampon);
                     }
-                    else {
+                    else { // si on arrive au bout de l'historique
                         ptampon = 0;
                         efface_ligne();
                     }
-                }
-                else if(str[i + 1] == '[' && str[i + 2] == 'D'){
-                    printf("\b");
-                }
-                else if(str[i + 1] == '[' && str[i + 2] == 'C'){
+                    break;
+
+                case 'C':
                     avance_curseur();
-                }
-                else if(str[i + 1] == '[' && str[i + 2] == '5'){
+                    break;
+                
+                case 'D':
+                    printf("\b");
+                    break;
+
+                case '5':
                     defillement_haut();
                     i++;
-                }
-                else if(str[i + 1] == '[' && str[i + 2] == '6'){
+                    break;
+
+                case '6':
                     defillement_bas();
                     i++;
+                    break;
+                    
+                default:
+                    break;
                 }
+                // on skip les 2 prochains caractères
                 i+=2;
             break;
             case 127: // Backspace
