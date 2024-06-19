@@ -272,7 +272,7 @@ Command commands[] = {
     {"theme", cmd_theme, "Jouer une musique ! entre 1 et 23.", false},
     {"clear", cmd_clear, "Efface le terminal", false},
     {"echo", cmd_echo, "Change le mode d'affichage", false},
-    {"rdm", cmd_rdm, "Affiche un nombre aleatoire", false},
+    {"rdm", cmd_rdm, "Affiche un nombre pseudo-aleatoire", false},
     {"MoreLess", cmd_more_less_game, "Jouer au jeu du plus ou moins", false},
     {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
     {"piano", cmd_piano, "Joueur au piano", false},
