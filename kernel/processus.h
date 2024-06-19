@@ -20,7 +20,7 @@
 #define USER_END 0x3000000
 
 
-// #define CANARY_VALUE_A (int32_t)0xDEADBEEF
+#define CANARY_VALUE_A (int32_t)0xDEADBEEF
 // #define CANARY_VALUE_B (int32_t)0xCAFEBABE
 // #define CANARY_VALUE_C (int32_t)0xBEEFCAFE
 

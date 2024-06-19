@@ -92,9 +92,9 @@ void printWelcomeMessageRose() {
     printf("                       BIENVENUE GENESIS OS\n");
     wait_clock(50);
     printf("                 Type 'help' for a list of commands.\n");
-    play_melody(startrek_intro_melody,startrek_intro_nbNotes,startrek_intro_tempo);
     
-
+    Theme theme_music = get_startrek_intro();
+    play_melody(theme_music.melody, theme_music.nbNotes, theme_music.tempo);
     return;
 }
 
@@ -131,13 +131,11 @@ void cmd_exit(int argc, char *argv[]) {
     (void)argv;
 
     int cpt = 3;
-    unsigned long clock = current_clock();
     while (cpt > 0) {
         printf("Fermeture dans %d secondes\n", cpt);
-        wait_clock(clock+100);
+        wait_clock(current_clock()+100);
         cpt--;
     }
-    printf("Sortie du noyau imminent...\n");
     exit_kernel();
     exit(0);
 }
@@ -209,6 +207,20 @@ void cmd_rdm(int argc, char *argv[]) {
     printf("%d\n", rand_int());
 }
 
+void cmd_kill(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Utilisation: kill <pid>\n");
+        return;
+    }
+
+    int pid = atoi(argv[1]);
+    if (kill(pid) == -1) {
+        printf("Impossible de tuer le processus %d\n", pid);
+    } else {
+        printf("Processus %d tue\n", pid);
+    }
+}
+
 void parse_command(char *input, int *argc, char *argv[]) {
     *argc = 0;
     char *token = strtok(input, " ");
@@ -228,11 +240,12 @@ Command commands[] = {
     {"theme", cmd_theme, "Jouer une musique ! entre 1 et 23.", false},
     {"clear", cmd_clear, "Efface le terminal", false},
     {"echo", cmd_echo, "Change le mode d'affichage", false},
-    {"rdm", cmd_rdm, "Affiche un nombre aléatoire", false},
+    {"rdm", cmd_rdm, "Affiche un nombre aleatoire", false},
     {"MoreLess", cmd_more_less_game, "Jouer au jeu du plus ou moins", false},
     {"pendu", cmd_pendu, "Jouer au jeu du pendu", false},
     {"piano", cmd_piano, "Joueur au piano", false},
-    {"banner", cmd_banner, "Afficher la bannière", false},
+    {"banner", cmd_banner, "Afficher la banniere", false},
+    {"kill", cmd_kill, "Tuer un processus", false},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
     {"echo_hist", cmd_hist, "Affiche l'historique", false},
@@ -288,22 +301,12 @@ int superShell(void *arg) {
     return 0;
 }
 
-int c_runner(void){
-  // printf("proc runner !\n");
-  //test_until(20);
-  //test_run(17);
-  return 0;
-}
-
-
-
-
 void user_start(void) {
-    // startup melody
     printWelcomeMessageRose();
 
     set_color(BLANC);
     srand(42);
+
     start(&superShell, 40000, 2, "SuperShell", NULL);
     return;
 }

@@ -1271,3 +1271,128 @@ const int defeat_melody[] = {
 };
 int defeat_nbNotes = sizeof(defeat_melody) / sizeof(defeat_melody[0]) / 2;
 int defeat_tempo = 120;
+
+Theme get_bloodytears() {
+    Theme theme = {bloodytears_melody, bloodytears_nbNotes, bloodytears_tempo};
+    return theme;
+}
+
+Theme get_silentnight() {
+    Theme theme = {silentnight_melody, silentnight_nbNotes, silentnight_tempo};
+    return theme;
+}
+
+Theme get_cannonind() {
+    Theme theme = {cannonind_melody, cannonind_nbNotes, cannonind_tempo};
+    return theme;
+}
+
+Theme get_greenhill() {
+    Theme theme = {greenhill_melody, greenhill_nbNotes, greenhill_tempo};
+    return theme;
+}
+
+Theme get_harrypotter() {
+    Theme theme = {harrypotter_melody, harrypotter_nbNotes, harrypotter_tempo};
+    return theme;
+}
+
+Theme get_imperialmarch() {
+    Theme theme = {imperialmarch_melody, imperialmarch_nbNotes, imperialmarch_tempo};
+    return theme;
+}
+
+Theme get_keyboardcat() {
+    Theme theme = {keyboardcat_melody, keyboardcat_nbNotes, keyboardcat_tempo};
+    return theme;
+}
+
+Theme get_miichannel() {
+    Theme theme = {miichannel_melody, miichannel_nbNotes, miichannel_tempo};
+    return theme;
+}
+
+Theme get_nvrgonnagiveuup() {
+    Theme theme = {nvrgonnagiveuup_melody, nvrgonnagiveuup_nbNotes, nvrgonnagiveuup_tempo};
+    return theme;
+}
+
+Theme get_pinkpanther() {
+    Theme theme = {pinkpanther_melody, pinkpanther_nbNotes, pinkpanther_tempo};
+    return theme;
+}
+
+Theme get_princelgor() {
+    Theme theme = {princelgor_melody, princelgor_nbNotes, princelgor_tempo};
+    return theme;
+}
+
+Theme get_professorlayton() {
+    Theme theme = {professorlayton_melody, professorlayton_nbNotes, professorlayton_tempo};
+    return theme;
+}
+
+Theme get_songofstorms() {
+    Theme theme = {songofstorms_melody, songofstorms_nbNotes, songofstorms_tempo};
+    return theme;
+}
+
+Theme get_startrek_intro() {
+    Theme theme = {startrek_intro_melody, startrek_intro_nbNotes, startrek_intro_tempo};
+    return theme;
+}
+
+Theme get_supermario() {
+    Theme theme = {supermario_melody, supermario_nbNotes, supermario_tempo};
+    return theme;
+}
+
+Theme get_takeonme() {
+    Theme theme = {takeonme_melody, takeonme_nbNotes, takeonme_tempo};
+    return theme;
+}
+
+Theme get_tetris() {
+    Theme theme = {tetris_melody, tetris_nbNotes, tetris_tempo};
+    return theme;
+}
+
+Theme get_thegodfather() {
+    Theme theme = {thegodfather_melody, thegodfather_nbNotes, thegodfather_tempo};
+    return theme;
+}
+
+Theme get_vampirekiller() {
+    Theme theme = {vampirekiller_melody, vampirekiller_nbNotes, vampirekiller_tempo};
+    return theme;
+}
+
+Theme get_zeldaslullaby() {
+    Theme theme = {zeldaslullaby_melody, zeldaslullaby_nbNotes, zeldaslullaby_tempo};
+    return theme;
+}
+
+Theme get_zeldatheme() {
+    Theme theme = {zeldatheme_melody, zeldatheme_nbNotes, zeldatheme_tempo};
+    return theme;
+}
+
+Theme get_doom() {
+    Theme theme = {doom_melody, doom_nbNotes, doom_tempo};
+    return theme;
+}
+
+Theme get_gameofthrone() {
+    Theme theme = {gameofthrone_melody, gameofthrone_nbNotes, gameofthrone_tempo};
+    return theme;
+}
+
+Theme get_victory() {
+    Theme theme = {victory_melody, victory_nbNotes, victory_tempo};
+    return theme;
+}
+
+Theme get_defeat() {
+    Theme theme = {defeat_melody, defeat_nbNotes, defeat_tempo};
+    return theme;
+}

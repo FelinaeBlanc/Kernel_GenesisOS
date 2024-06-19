@@ -141,25 +141,23 @@ int start(int (*pt_func)(void*), unsigned long ssize, int prio, const char *name
     // SS (stack segment) désigne un segment de pile ;
     // ES, FS et GS permettent d'adresser trois segments supplémentaires.
 
-    proc->pileUser[nbMotUser-1] = (int32_t)arg;  // gestion des arguments
-    proc->pileUser[nbMotUser-2] = EXIT_ROUTINE; // Ret adresse
+     // Ajoute les canaries au début et fin de la pile
+    proc->pileUser[0] = CANARY_VALUE_A;
+    proc->pileUser[nbMotUser - 1] = CANARY_VALUE_A;
+
+    proc->pileUser[nbMotUser-2] = (int32_t)arg;  // gestion des arguments
+    proc->pileUser[nbMotUser-3] = EXIT_ROUTINE; // Ret adresse
     //proc->pileUser[nbMotUser - 3] = (int32_t)pt_func;
 
     proc->pileKernel[nbMotKernel-1] = USER_DS; // SS
-    proc->pileKernel[nbMotKernel-2] = (int32_t)(&proc->pileUser[nbMotUser - 2]); // ESP User
+    proc->pileKernel[nbMotKernel-2] = (int32_t)(&proc->pileUser[nbMotUser - 3]); // ESP User
     proc->pileKernel[nbMotKernel-3] = USER_EFLAGS; // EFLAGS
     proc->pileKernel[nbMotKernel-4] = USER_CS; // CS
     proc->pileKernel[nbMotKernel-5] = (int32_t)pt_func; // EIP
     proc->pileKernel[nbMotKernel-6] = (int32_t)iret_func; // iret!
 
-    // Ajoute les canaries au début et fin de la pile
-    //proc->pileKernel[0] = CANARY_VALUE_A;
-    //proc->pileKernel[1] = CANARY_VALUE_B;
-    //proc->pileKernel[2] = CANARY_VALUE_C;
-
-    //proc->pileKernel[nbMot - 1] = CANARY_VALUE_A;
-    //proc->pileKernel[nbMot - 2] = CANARY_VALUE_B;
-    //proc->pileKernel[nbMot - 3] = CANARY_VALUE_C;
+   
+    
 
     // (ebx, esp, ebp, esi, edi)
     proc->contexte[1] = (int32_t)&proc->pileKernel[nbMotKernel-6];
@@ -271,8 +269,6 @@ void free_childs(Processus * proc){
 void free_mourant_queue(){
     Processus * procMort;
     while ((procMort = queue_out(&proc_mourants, Processus, chainage)) != NULL){
-        //printf("Je suis mort %s\n", procMort->nom);
-
         free_childs(procMort); // On libère les fils
 
         tableDesProcs[procMort->pid] = NULL;
@@ -283,13 +279,42 @@ void free_mourant_queue(){
     }
 }
 
-// bool checkCanary(Processus * proc){
-//     if (proc == NULL){ return false; }
+void OSPanic(char * message){
+    set_color(BLANC);
+    printf("     .... NO! ...                  ... MNO! ...\n");
+    printf("   ..... MNO!! ...................... MNNOO! ...\n");
+    printf(" ..... MMNO! ......................... MNNOO!! .\n");
+    printf(".... MNOONNOO!   MMMMMMMMMMPPPOII!   MNNO!!!! .\n");
+    printf(" ... !O! NNO! MMMMMMMMMMMMMPPPOOOII!! NO! ....\n");
+    printf("    ...... ! MMMMMMMMMMMMMPPPPOOOOIII! ! ...\n");
+    printf("   ........ MMMMMMMMMMMMPPPPPOOOOOOII!! .....\n");
+    printf("   ........ MMMMMOOOOOOPPPPPPPPOOOOMII! ...  \n");
+    printf("    ....... MMMMM..    OPPMMP    .,OMI! ....\n");
+    printf("     ...... MMMM::   o.,OPMP,.o   ::I!! ...\n");
+    printf("         .... NNM:::.,,OOPM!P,.::::!! ....\n");
+    printf("          .. MMNNNNNOOOOPMO!!IIPPO!!O! .....\n");
+    printf("         ... MMMMMNNNNOO:!!:!!IPPPPOO! ....\n");
+    printf("           .. MMMMMNNOOMMNNIIIPPPOO!! ......\n");
+    printf("          ...... MMMONNMMNNNIIIOO!..........\n");
+    printf("       ....... MN MOMMMNNNIIIIIO! OO ..........\n");
+    printf("    ......... MNO! IiiiiiiiiiiiI OOOO ...........\n");
+    printf("  ...... NNN.MNO! . O!!!!!!!!!O . OONO NO! ........\n");
+    printf("   .... MNNNNNO! ...OOOOOOOOOOO .  MMNNON!........\n");
+    printf("   ...... MNNNNO! .. PPPPPPPPP .. MMNON!........\n");
+    printf("      ...... OO! ................. ON! .......\n");
+    printf("         ................................\n");
+    set_color(ROUGE);printf(" OS PANIC");
+    set_color(BLANC);printf(" : %s \n", message);
 
-//     int32_t nbMot = proc->pileSize / sizeof(int32_t);
-//     return (proc->pileKernel[0] == CANARY_VALUE_A && proc->pileKernel[1] == CANARY_VALUE_B && proc->pileKernel[2] == CANARY_VALUE_C) 
-//     && (proc->pileKernel[nbMot - 1] == CANARY_VALUE_A && proc->pileKernel[nbMot - 2] == CANARY_VALUE_B && proc->pileKernel[nbMot - 3] == CANARY_VALUE_C);
-// }
+    *(char *)0 = 0;
+    return;
+}
+bool checkCanary(Processus * proc){
+     if (proc == NULL){ return false; }
+
+     int32_t nbMot = proc->pileSizeUser / sizeof(int32_t);
+     return (proc->pileUser[0] == CANARY_VALUE_A && proc->pileUser[nbMot - 1] == CANARY_VALUE_A);
+}
 
 /***********Ordonnanceur*********/
 void ordonnanceur(void){
@@ -297,11 +322,9 @@ void ordonnanceur(void){
     //free_mourant_queue(); // On libère les processus mourant
     Processus * procEluActuel = ProcElu;
     if (!queue_empty(&proc_activables)) {
-
-        /*if (procEluActuel != ProcIdle && !checkCanary(procEluActuel)){
-            printf("Canary corrompu ! EXIT /!\\\n");
-            *(char *)0 = 0;
-        }*/
+        if (procEluActuel != ProcIdle && !checkCanary(procEluActuel)){
+            OSPanic("Un processus a corrompu sa pile user!"); // Exit
+        }
 
         switch (procEluActuel->etat) {
             case MOURANT:
@@ -323,7 +346,8 @@ void ordonnanceur(void){
         ProcElu = procEluSuiv; 
 
         int32_t nbMotKernel = ProcElu->pileSizeKernel / sizeof(int32_t);
-        tss.esp0 =  (int) &ProcElu->pileKernel[nbMotKernel-1];//ProcElu->contexte[1];
+        tss.esp0 =  (int) &ProcElu->pileKernel[nbMotKernel-1];
+
         ctx_sw(procEluActuel->contexte,ProcElu->contexte);
     }
 }
@@ -445,7 +469,6 @@ void exit(int retval){
     Processus * procMort = ProcElu;
     procMort->retval = retval;
 
-    // printf("fin_processus Je suis mort %s\n", procMort->nom);
     if (procMort->pere != NULL){
         procMort->etat = ZOMBIE;
 

@@ -47,6 +47,27 @@ void cmd_pendu(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
+    Theme theme_music;
+    int rdm = rand_int() % 4;
+    switch (rdm){
+        case 0:
+            theme_music = get_harrypotter();
+            break;
+        case 1:
+            theme_music = get_pinkpanther();
+            break;
+        case 2:
+            theme_music = get_songofstorms();
+            break;
+        case 3:
+            theme_music = get_doom();
+            break;
+    }
+    int pid_player = start(play_melody_proc_loop, 4000 ,getprio(getpid()) , "Music Player Pendu", &theme_music);
+    if (pid_player < 0) {
+        printf("Impossible de lancer la music...\n");
+    }
+
     char word[WORD_LENGTH];
     choose_random_word(word);
 
@@ -110,12 +131,21 @@ void cmd_pendu(int argc, char *argv[]) {
         }
     }
 
+    if (pid_player >= 0){
+        kill(pid_player);
+        waitpid(pid_player, NULL);
+    }
 
+     Theme end_theme;
     if (win) {
         printf("Felicitations ! Vous avez trouve le mot : %s\n", word);
-        play_melody(victory_melody, victory_nbNotes, victory_tempo);
+        end_theme = get_victory();
     } else {
         printf("Vous avez perdu ! Le mot etait : %s\n", word);
-        play_melody(defeat_melody, defeat_nbNotes, defeat_tempo);
+        end_theme = get_defeat();
+    }
+    pid_player = start(play_melody_proc_once, 4000, getprio(getpid()), "Music Player Pendu", &end_theme);
+    if (pid_player >= 0) {
+        waitpid(pid_player, NULL);
     }
 }
