@@ -23,8 +23,10 @@ typedef struct {
 } Command;
 
 int proc_runner_until(void * arg){
+    set_id_start(0);
     int num = (int)arg;
     test_until(num);
+    set_id_start(2);
     return 0;
 }
 int proc_runner(void * arg){

@@ -209,23 +209,4 @@ void do_scancode(int scancode)
 		keyboard_handle_scancode(scancode, !(scancode & 0x80));
 		keyboard_tasklet_fn(0);
 	}
-	static unsigned char led_state = 0;
-	switch (scancode) {
-	// case 'a':
-	// 	led_state = 0x07;
-	// 	break;
-	case 0x3A:
-		led_state ^= (1 << 2); // Inversion de l'état de la diode Caps Lock
-		break;
-	case 0x45:
-		led_state ^= (1 << 1); // Inversion de l'état de la diode Num Lock
-		break;
-	case 0x46:
-		led_state ^= (1 << 0); // Inversion de l'état de la diode Scroll Lock
-		break;
-	default:
-		break;
-    }
-
-	kbd_leds(led_state);
 }
