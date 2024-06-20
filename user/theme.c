@@ -63,6 +63,7 @@ void cmd_theme(int argc, char *argv[]){
     printf("09: Never gonna give you up\n");
     printf("10: Autres\n");
 
+    set_id_start(0);
     char input[3];
     cons_read(input, 2);
     printf("\n");
@@ -245,5 +246,6 @@ void cmd_theme(int argc, char *argv[]){
     }
     printf("\n");
     set_color(BLANC);
+    set_id_start(2);
     return;
 }

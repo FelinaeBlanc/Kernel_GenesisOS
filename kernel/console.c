@@ -22,7 +22,7 @@ int index_history = 0;
 int current_idex_history = 0;
 
 // variable pour le scroll
-uint16_t screen_buffer[HAUTEUR*10][LARGEUR];
+uint16_t screen_buffer[HAUTEUR*100][LARGEUR];
 uint16_t buff_ligne = 0;
 uint16_t buff_display_ligne = 0;
 
@@ -134,7 +134,7 @@ void traite_car(char c) {
         place_curseur(lig, col);
         break;
     case '\n': // LF 10
-        place_curseur((ligne+1)%HAUTEUR, 0);
+        place_curseur((ligne+1)%HAUTEUR, id_col_start);
         buff_ligne++;
         break;
     case '\f':
@@ -147,7 +147,7 @@ void traite_car(char c) {
     case '\x1b': // si c'est une flèche on écrit rien
         break;
     case 127: // DEL
-        if (colonne > 2) {
+        if (colonne > id_col_start) {
             ecrit_car(ligne, colonne - 1, NOIR, NOIR, FALSE, ' ');
             screen_buffer[buff_ligne][colonne-1] = car_value(NOIR, NOIR, FALSE, ' ');
             place_curseur(ligne, colonne - 1);

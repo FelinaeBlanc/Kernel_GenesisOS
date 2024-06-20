@@ -39,7 +39,7 @@ extern int id_col_start;
 extern uint16_t ligne, colonne;
 extern bool echo;
 
-extern uint16_t screen_buffer[HAUTEUR*10][LARGEUR];
+extern uint16_t screen_buffer[HAUTEUR*100][LARGEUR];
 extern uint16_t buff_ligne;
 extern uint16_t buff_display_ligne;
 
