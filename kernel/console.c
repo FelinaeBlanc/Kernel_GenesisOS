@@ -229,7 +229,7 @@ int cons_read(char *string, unsigned long length) {
     }
 
     // Lecture des données depuis le tampon
-    memset(string, 0, length); // on vide string avant de commencer
+    memset(string, 0, length); // On vide string avant de commencer
     read = false;
     int i = 0;
     while (i < (int)length && i < ptampon) {
@@ -238,23 +238,26 @@ int cons_read(char *string, unsigned long length) {
     }
 
     // Gestion de l'historique des commandes
-    if (index_history == HISTORY_SIZE) {
-        // Libérer la mémoire de la commande la plus ancienne
-        mem_free(history[0], strlen(history[0])+1);
-        // Décaler les entrées restantes vers le début
-        for (int j = 1; j < HISTORY_SIZE; j++) {
-            history[j - 1] = history[j];
+    if (length > 1) { // Ajouté pour éviter d'ajouter des commandes de longueur 1 à l'historique
+        if (index_history == HISTORY_SIZE) {
+            // Libérer la mémoire de la commande la plus ancienne
+            mem_free(history[0], strlen(history[0])+1);
+            // Décaler les entrées restantes vers le début
+            for (int j = 1; j < HISTORY_SIZE; j++) {
+                history[j - 1] = history[j];
+            }
+            index_history--;
         }
-        index_history--;
+
+        // Allocation de mémoire pour la nouvelle commande
+        history[index_history] = (char *)mem_alloc(strlen(string) + 1);
+        strcpy(history[index_history], string);
+        index_history++;
+        current_idex_history = index_history;
     }
 
-    // Allocation de mémoire pour la nouvelle commande
-    history[index_history] = (char *)mem_alloc(strlen(string) + 1);
-    strcpy(history[index_history], string);
-    index_history++;
-    current_idex_history=index_history;
-
     int retval = i;
+
     // Décalage des données restantes dans le tampon
     if (i < ptampon) {
         memmove(tampon, tampon + i, ptampon - i);
@@ -264,10 +267,11 @@ int cons_read(char *string, unsigned long length) {
     }
 
     // Remplir le reste du tampon avec des zéros pour le vider
-    memset(tampon + ptampon, 0, BUFFER_SIZE );
+    memset(tampon + ptampon, 0, BUFFER_SIZE - ptampon);
 
     return retval;
 }
+
 
 void display_buff(){
     for(uint16_t i = buff_display_ligne; i <= buff_ligne; i++){
