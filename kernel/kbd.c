@@ -116,10 +116,3 @@ void keyboard_data(char *str) {
     }
 }
 
-void kbd_leds(unsigned char leds){
-    (void)leds ;
-    outb(0x60, 0xED);
-    //udelay(100);
-    outb(0x60, 0x06);
-}
-
