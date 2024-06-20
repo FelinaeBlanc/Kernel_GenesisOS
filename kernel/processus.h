@@ -120,4 +120,9 @@ extern int kill(int pid);
 
 extern int waitpid(int, int *);
 
+// partie multishell
+#define MAX_PROC_SHELL 5
+extern Processus * tableProcShell[MAX_PROC_SHELL]; // Max 5 shell
+extern int add_shell(int pid, int num);
+
 #endif

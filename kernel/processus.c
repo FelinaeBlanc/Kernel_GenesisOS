@@ -602,3 +602,18 @@ int waitpid(int pid, int *retvalp){
     return procPid;
 }
 
+/*************Partie MultiProcess****************/
+Processus * tableProcShell[MAX_PROC_SHELL];
+
+int add_shell(int pid, int num){
+    // num invalide
+    if(num>=MAX_PROC_SHELL || num<0) return -1;
+    // proc null
+    if(tableDesProcs[pid]==NULL) return -1;
+    // proc shell déja créé
+    if(tableProcShell[num]!=NULL) return 0;
+
+    tableProcShell[num] = tableDesProcs[pid];
+    return 1;
+}
+

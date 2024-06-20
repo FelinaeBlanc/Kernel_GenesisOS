@@ -38,5 +38,7 @@
 #define CONS_SWITCH_ECHO 32
 #define SET_ID_START 33
 #define ECHO_HIST 34
+#define ADD_SHELL 35
+#define SET_CONSOLE 36
 
 #endif

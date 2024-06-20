@@ -22,9 +22,9 @@ int index_history = 0;
 int current_idex_history = 0;
 
 // variable pour le scroll
-uint16_t screen_buffer[HAUTEUR*10][LARGEUR];
-uint16_t buff_ligne = 0;
-uint16_t buff_display_ligne = 0;
+uint16_t screen[10*HAUTEUR][LARGEUR];
+uint16_t cons_ligne = 0;
+uint16_t cons_display_ligne = 0;
 
 /************Fonction écriture console**************/
 // revoie l'adresse mémoir de lig col
@@ -66,7 +66,7 @@ void efface_ecran(void){
             ecrit_car(i, j, NOIR, NOIR, FALSE, ' ');
         }
     }
-    buff_display_ligne = buff_ligne;
+    cons_display_ligne = cons_ligne;
 }
 
 
@@ -88,7 +88,7 @@ void place_curseur(uint32_t lig, uint32_t col)
 void efface_ligne(void){
     for (uint32_t j=id_col_start; j<LARGEUR; j++){
         ecrit_car(ligne, j, NOIR, NOIR, FALSE, ' ');
-        screen_buffer[buff_ligne][j] = car_value(NOIR, NOIR, FALSE, ' ');
+        screen[cons_ligne][j] = car_value(NOIR, NOIR, FALSE, ' ');
     }
     place_curseur(ligne, id_col_start);
 }
@@ -129,13 +129,13 @@ void traite_car(char c) {
         lig = ligne;
         if (col < colonne) {
             lig = ligne +1;
-            buff_ligne++;
+            cons_ligne = (cons_ligne+1)%(HAUTEUR*10);
         } 
         place_curseur(lig, col);
         break;
     case '\n': // LF 10
         place_curseur((ligne+1)%HAUTEUR, 0);
-        buff_ligne++;
+        cons_ligne = (cons_ligne+1)%(HAUTEUR*10);
         break;
     case '\f':
         efface_ecran();
@@ -149,7 +149,7 @@ void traite_car(char c) {
     case 127: // DEL
         if (colonne > 2) {
             ecrit_car(ligne, colonne - 1, NOIR, NOIR, FALSE, ' ');
-            screen_buffer[buff_ligne][colonne-1] = car_value(NOIR, NOIR, FALSE, ' ');
+            screen[cons_ligne][colonne-1] = car_value(NOIR, NOIR, FALSE, ' ');
             place_curseur(ligne, colonne - 1);
         }
         break;
@@ -163,7 +163,7 @@ void traite_car(char c) {
         }
         if (c <= 126 && c >= 32){
             ecrit_car(ligne, colonne, base_color, NOIR, FALSE, c);
-            screen_buffer[buff_ligne][colonne] = car_value(base_color, NOIR, FALSE, c);
+            screen[cons_ligne][colonne] = car_value(base_color, NOIR, FALSE, c);
             col = colonne +1;
             lig = ligne;
 
@@ -178,7 +178,7 @@ void traite_car(char c) {
 
     if (ligne == HAUTEUR - 1) {
         defilement();
-        buff_display_ligne++;
+        cons_display_ligne++;
         ligne--;
     }
 }
@@ -270,26 +270,51 @@ int cons_read(char *string, unsigned long length) {
 }
 
 void display_buff(){
-    for(uint16_t i = buff_display_ligne; i <= buff_ligne; i++){
+    for(uint16_t i = cons_display_ligne; i <= cons_ligne; i++){
         for (uint16_t j = 0; j < LARGEUR; j++)
         {
-            ecrit_car_value(i-buff_display_ligne, j, screen_buffer[i][j]);
+            ecrit_car_value(i-cons_display_ligne, j, screen[i][j]);
         }
     }
 }
 
 void defillement_haut(){
-    if(buff_display_ligne > 0) {
-        buff_display_ligne--;
+    if(cons_display_ligne > 0) {
+        cons_display_ligne--;
         display_buff();
     }
 }
 
 void defillement_bas() {
-    if (buff_display_ligne + HAUTEUR <= buff_ligne) {
-        buff_display_ligne++;
+    if (cons_display_ligne + HAUTEUR <= cons_ligne ) {
+        cons_display_ligne++;
         display_buff();
         place_curseur(HAUTEUR-1, id_col_start);
     }
     efface_ligne();
+}
+
+console * tableConsole[5];
+
+void switch_console(console *c){
+    printf("Je bloque totalement ici\n");
+
+    for (int i = 0; i < HAUTEUR * 10; ++i) {
+        for (int j = 0; j < LARGEUR; ++j) {
+            screen[i][j] = c->screen_buffer[i][j];
+        }
+    }
+    
+    printf("Pourquoi je peux pas display ?");
+    cons_ligne = c->buff_ligne;
+    cons_display_ligne = c->buff_display_ligne;
+
+    display_buff();
+}
+
+void set_console(int num){
+    if(num>=MAX_PROC_SHELL || num<0) return;
+    if(tableProcShell[num]==NULL) return;
+    tableConsole[num] = mem_alloc(sizeof(console));
+    switch_console(tableConsole[num]);
 }

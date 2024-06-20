@@ -5,6 +5,7 @@
 #include "console.h"
 #include "processus.h"
 #include "cpu.h"
+#include "sound.h"
 
 char tampon[BUFFER_SIZE];
 int ptampon = 0;
@@ -67,7 +68,53 @@ void keyboard_data(char *str) {
                     defillement_bas();
                     i++;
                     break;
-                    
+
+                case '[':
+                    // pour les caractère F1 F2...
+                    if(i >= (int)strlen(str) - 3) break;
+                    switch (str[i+3])
+                    {
+                    case 'A':
+                        // on check si l'élu n'est pas shell 0
+                        if(ProcElu == tableProcShell[0]) break;
+                        // si le shell existe alors aller dessus
+                        if(tableDesProcs[0]!=NULL){
+                            
+                            ProcElu->etat = ACTIVABLE;
+                            ordonnanceur();
+                            switch_console(0);
+                        }
+                        break;
+                    case 'B':
+                        if(ProcElu == tableProcShell[1]) break;
+                        if(tableDesProcs[1]!=NULL){
+                            ProcElu->etat = ACTIVABLE;
+                            ordonnanceur();
+                        }
+                        break;
+                    case 'C':
+                        if(ProcElu == tableProcShell[2]) break;
+                        if(tableDesProcs[2]!=NULL){
+                            //ProcElu = tableDesProcs[2];
+                        }
+                        break;
+                    case 'D':
+                        if(ProcElu == tableProcShell[3]) break;
+                        if(tableDesProcs[3]!=NULL){
+                            //ProcElu = tableDesProcs[3];
+                        }
+                        break;
+                    case 'E':
+                        if(ProcElu == tableProcShell[4]) break;
+                        if(tableDesProcs[4]!=NULL){
+                            //ProcElu = tableDesProcs[4];
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
+                    i+=2; //pour skip 3 caractère au lieu de 2
                 default:
                     break;
                 }
@@ -93,7 +140,13 @@ void keyboard_data(char *str) {
                 verifie_es();
 				break;
             default:
-                if (c >= 32 && c <= 126) {
+                if(c<32){
+                    if(64 + c=='C'){ 
+                        nosound();
+                        kill(getpid());
+                    }
+                }
+                else if (c >= 32 && c <= 126) {
                     tampon[ptampon++] = c;
                     verifie_es();
                 }

@@ -65,5 +65,7 @@ extern int wait(int sid);
 extern void play_sound(unsigned int frequency, int t);
 extern void cons_switch_echo();
 extern void afficher_historique();
+extern int add_shell(int pid, int num);
+extern void set_console(int num);
 
 #endif

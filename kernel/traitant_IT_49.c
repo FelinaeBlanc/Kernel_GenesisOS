@@ -157,6 +157,12 @@ int traitant_IT_49_switch(int eax_val, int ebx_val, int ecx_val, int edx_val, in
         case ECHO_HIST:
             afficher_historique();
             break;
+        case ADD_SHELL:
+            retval = add_shell(ebx_val, ecx_val);
+            break;
+        case SET_CONSOLE:
+            set_console(ebx_val);
+            break;
         default:
             // ERREUR A FAIRE !!! PAS DE VALEUR CONNUE
             break;
