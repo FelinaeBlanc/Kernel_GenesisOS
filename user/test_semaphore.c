@@ -170,7 +170,8 @@ void cmd_test_semaphore(int argc, char *argv[]) {
     set_color(VERT);
     printf("Test semaphore\n");set_color(BLANC);
 
-    start(&test200, 4000, 128, "test_semaphore", NULL);
+    int pid_test = start(&test200, 4000, 128, "test_semaphore", NULL);
+    waitpid(pid_test, NULL);
 
     set_color(VERT);printf("Test finished\n");
     set_color(BLANC);

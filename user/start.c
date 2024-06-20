@@ -314,10 +314,10 @@ int superShell(void *arg) {
 
         printf("$ ");
         cons_read(str, CMD_SIZE);
+        printf("\n");
         parse_command(str, &argc, argv);
 
         if (argc == 0){ 
-            printf("\n");
             continue;  // Pas de commande entrée
         }
 

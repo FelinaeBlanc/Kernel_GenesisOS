@@ -64,7 +64,7 @@ void cmd_theme(int argc, char *argv[]){
     printf("10: Autres\n");
 
     char input[3];
-    cons_read(input, 3);
+    cons_read(input, 2);
     printf("\n");
     if (atoi(input) == 10){
         printf("11: Pink panther\n");
@@ -238,14 +238,12 @@ void cmd_theme(int argc, char *argv[]){
             char input[2];
             set_color(BLANC);
             cons_read(input, 1);
-            printf("\n");
-        
+
             kill(pid_player);
             waitpid(pid_player, NULL);
         }
     }
     printf("\n");
     set_color(BLANC);
-
     return;
 }
