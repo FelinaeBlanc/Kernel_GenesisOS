@@ -252,6 +252,19 @@ void cmd_wait(int argc, char *argv[]) {
         printf("Processus %d termine avec status %d\n", pid, status);
     }
 }
+int proc_crash_pile_test(void * arg){
+    (void)arg;
+    int a[10000];
+    for (int i = 0; i < 10000; i++) {
+        a[i] = i;
+    }
+    return a[0];
+}
+
+void cmd_crash_pile_test(int argc, char *argv[]) {
+    (void)argc;(void)argv;
+    start(&proc_crash_pile_test, 0, 128, NULL, NULL);
+}
 
 void parse_command(char *input, int *argc, char *argv[]) {
     *argc = 0;
@@ -280,6 +293,7 @@ Command commands[] = {
     {"create_proc", cmd_create_proc, "Creer un processus factice", false},
     {"kill", cmd_kill, "Tuer un processus", false},
     {"wait", cmd_wait, "Attendre un processus", false},
+    {"crash_pile_test", cmd_crash_pile_test, "Creer un processus et crash la pile [CRASH]", true},
     {"exit", cmd_exit, "Sortir du noyau", false},
     {"help", cmd_help, "Afficher aide", false},
     {"echo_hist", cmd_hist, "Affiche l'historique", false},
