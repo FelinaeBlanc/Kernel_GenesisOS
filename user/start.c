@@ -14,6 +14,7 @@
 #include "theme_lib.h"
 
 #define CMD_SIZE 25
+#define HISTORY_SIZE 100
 
 typedef struct {
     char *cmd;
@@ -34,8 +35,6 @@ int proc_runner(void * arg){
     test_run(num);
     return 0;
 }
-
-
 
 void printWelcomeMessageRose() {
     printf("\f\n\n\n");
@@ -99,7 +98,6 @@ void printWelcomeMessageRose() {
     play_melody(theme_music.melody, theme_music.nbNotes, theme_music.tempo);
     return;
 }
-
 
 void cmd_banner(int argc, char *argv[]) {
     (void)argc;(void)argv;
@@ -303,6 +301,16 @@ Command commands[] = {
 
 int num_commands = sizeof(commands) / sizeof(commands[0]);
 
+// Function to perform autocompletion
+void autocomplete_command(const char *partial, int len) {
+    for (int i = 0; i < num_commands; ++i) {
+        if (strncmp(commands[i].cmd, partial, len) == 0) {
+            printf("%s   ", commands[i].cmd);
+        }
+    }
+    printf("\n");
+}
+
 int superShell(void *arg) {
     (void)arg; // Pour éviter l'avertissement sur le paramètre non utilisé
 
@@ -315,6 +323,15 @@ int superShell(void *arg) {
         printf("$ ");
         cons_read(str, CMD_SIZE);
         printf("\n");
+        
+        int len = strlen(str);
+        if (len > 0 && str[len - 1] == '\t') {
+            // Remove the tab character
+            str[len - 1] = '\0';
+            autocomplete_command(str, len - 1);
+            continue;
+        }
+
         parse_command(str, &argc, argv);
 
         if (argc == 0){ 

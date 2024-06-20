@@ -84,6 +84,11 @@ void keyboard_data(char *str) {
                 }
                 break;
             case '\t':
+                tampon[ptampon] = str[i];
+				ptampon++;
+                read=true;
+                verifie_es();
+                break;
             case '\n':
                 tampon[ptampon] = str[i];
 				ptampon++;
