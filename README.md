@@ -70,6 +70,6 @@ Le shell intégré de **Genesis OS** offre une expérience interactive avec dive
 Clonez le dépôt, puis compilez avec :
 
 ```bash
-git clone https://github.com/votre_nom/genesis_os.git
+git clone https://github.com/FelinaeBlanc/Kernel_GenesisOS.git
 cd genesis_os
 make
